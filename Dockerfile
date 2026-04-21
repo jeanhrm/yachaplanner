@@ -1,4 +1,4 @@
-FROM php:8.4-apache
+FROM php:8.4-cli
 
 RUN apt-get update && apt-get install -y \
     libgd-dev \
@@ -21,10 +21,6 @@ RUN COMPOSER_ALLOW_SUPERUSER=1 composer install \
 RUN chown -R www-data:www-data storage bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
 
-ENV APACHE_DOCUMENT_ROOT /var/www/html/public
-RUN sed -i 's|/var/www/html|${APACHE_DOCUMENT_ROOT}|g' \
-    /etc/apache2/sites-available/000-default.conf
-RUN a2enmod rewrite
-RUN a2dismod mpm_event mpm_worker && a2enmod mpm_prefork
+EXPOSE 8080
 
-EXPOSE 80
+CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8080"]
