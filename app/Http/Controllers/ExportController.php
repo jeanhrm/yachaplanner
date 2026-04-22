@@ -151,8 +151,6 @@ class ExportController extends Controller
             'borderSize'  => 6,
             'borderColor' => '1a7a4a',
             'cellMargin'  => 80,
-            'unit'        => Table::WIDTH_PERCENT,
-            'width'       => 100,
         ];
 
         $table = $section->addTable($tableStyle);
