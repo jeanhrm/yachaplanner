@@ -130,7 +130,7 @@ class ChatController extends Controller
         $reply      = $data['content'][0]['text'] ?? '';
         $tokensIn   = $data['usage']['input_tokens'] ?? 0;
         $tokensOut  = $data['usage']['output_tokens'] ?? 0;
-        $latency    = now()->diffInMilliseconds($start);
+        $latency = max(0, (int) round(now()->diffInMilliseconds($start)));
 
         // Guardar respuesta del asistente
         ChatMessage::create([
