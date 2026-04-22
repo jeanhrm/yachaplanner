@@ -63,8 +63,6 @@
         .welcome-msg .w-icon { font-size: 48px; margin-bottom: 12px; }
         .welcome-msg p { font-size: 14px; line-height: 1.6; }
         .welcome-msg em { color: #059669; font-style: normal; font-weight: 500; }
-        .export-btn { margin-top: 8px; font-size: 12px; color: #059669; background: #f0fdf4; border: 1px solid #a7f3d0; border-radius: 6px; padding: 5px 12px; cursor: pointer; }
-        .export-btn:hover { background: #d1fae5; }
     </style>
 
     <div class="yp-layout">
@@ -106,7 +104,13 @@
                     <span id="current-module-name">Selecciona un módulo</span>
                     <span id="module-badge" class="yp-module-badge" style="display:none"></span>
                 </div>
-                <button onclick="newChat()" class="new-chat-btn">+ Nueva sesión</button>
+                <div style="display:flex;gap:8px;align-items:center;">
+                    <button id="export-btn" onclick="exportWord()"
+                        style="display:none;font-size:12px;color:#1a7a4a;background:#f0fdf4;border:1px solid #a7f3d0;border-radius:6px;padding:5px 12px;cursor:pointer;">
+                        ⬇ Exportar Word
+                    </button>
+                    <button onclick="newChat()" class="new-chat-btn">+ Nueva sesión</button>
+                </div>
             </div>
 
             <div id="messages">
@@ -151,11 +155,13 @@
             document.getElementById('btn-' + slug).classList.add('active');
             document.getElementById('messages').innerHTML =
                 `<div class="welcome-msg"><p>Módulo <em>${name}</em> activado.<br>¿Qué necesitas crear?</p></div>`;
+            document.getElementById('export-btn').style.display = 'none';
             document.getElementById('user-input').focus();
         }
 
         function newChat() {
             currentSessionId = null;
+            document.getElementById('export-btn').style.display = 'none';
             document.getElementById('messages').innerHTML =
                 '<div class="welcome-msg"><p>Nueva sesión iniciada.<br>Escribe tu solicitud.</p></div>';
         }
@@ -165,6 +171,7 @@
             currentModule = mod;
             document.getElementById('current-module-name').textContent = mod;
             document.getElementById('module-label').textContent = mod;
+            document.getElementById('export-btn').style.display = 'inline';
         }
 
         function handleKey(e) {
@@ -198,6 +205,14 @@
         }
 
         function removeTyping() { document.getElementById('typing')?.remove(); }
+
+        function exportWord() {
+            if (!currentSessionId) {
+                alert('Primero genera una respuesta para exportar.');
+                return;
+            }
+            window.open(`/export/word/${currentSessionId}`, '_blank');
+        }
 
         async function sendMessage() {
             const input = document.getElementById('user-input');
@@ -274,6 +289,7 @@
                             if (data.done) {
                                 currentSessionId = data.session_id;
                                 document.getElementById('credits-count').textContent = data.credits_remaining;
+                                document.getElementById('export-btn').style.display = 'inline';
                                 if (botBubble) botBubble.id = '';
                             }
                         } catch(e) {}
