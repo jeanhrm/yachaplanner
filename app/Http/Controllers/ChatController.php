@@ -119,7 +119,11 @@ class ChatController extends Controller
         ]);
 
         if (!$response->successful()) {
-            return response()->json(['error' => 'Error al conectar con la IA'], 500);
+            return response()->json([
+                'error' => 'Error al conectar con la IA',
+                'status' => $response->status(),
+                'body' => $response->body(),
+            ], 500);
         }
 
         $data       = $response->json();
