@@ -209,25 +209,82 @@
             document.getElementById('send-btn').disabled = true;
             addMessage('user', text);
             showTyping();
+
             try {
                 const res = await fetch('{{ route("chat.store") }}', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
-                    body: JSON.stringify({ module: currentModule, message: text, session_id: currentSessionId })
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        module: currentModule,
+                        message: text,
+                        session_id: currentSessionId,
+                    })
                 });
-                const data = await res.json();
-                removeTyping();
-                if (data.error) {
-                    addMessage('assistant', '❌ ' + data.error);
-                } else {
-                    addMessage('assistant', data.reply);
-                    currentSessionId = data.session_id;
-                    document.getElementById('credits-count').textContent = data.credits_remaining;
+
+                if (!res.ok) {
+                    removeTyping();
+                    addMessage('assistant', '❌ Error al conectar con el servidor.');
+                    document.getElementById('send-btn').disabled = false;
+                    input.focus();
+                    return;
                 }
+
+                const reader = res.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = '';
+                let fullReply = '';
+                let botBubble = null;
+
+                removeTyping();
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    buffer += decoder.decode(value, { stream: true });
+                    const lines = buffer.split('\n');
+                    buffer = lines.pop();
+
+                    for (const line of lines) {
+                        if (!line.startsWith('data: ')) continue;
+                        const json = line.slice(6).trim();
+                        if (!json) continue;
+
+                        try {
+                            const data = JSON.parse(json);
+
+                            if (data.chunk !== undefined) {
+                                fullReply += data.chunk;
+                                if (!botBubble) {
+                                    document.querySelector('.welcome-msg')?.remove();
+                                    const msgs = document.getElementById('messages');
+                                    const wrap = document.createElement('div');
+                                    wrap.className = 'msg-bot';
+                                    wrap.innerHTML = `<div class="bot-avatar">🌱</div><div class="bubble-bot" id="streaming-bubble"></div>`;
+                                    msgs.appendChild(wrap);
+                                    botBubble = document.getElementById('streaming-bubble');
+                                }
+                                botBubble.innerHTML = marked.parse(fullReply);
+                                document.getElementById('messages').scrollTop = 99999;
+                            }
+
+                            if (data.done) {
+                                currentSessionId = data.session_id;
+                                document.getElementById('credits-count').textContent = data.credits_remaining;
+                                if (botBubble) botBubble.id = '';
+                            }
+                        } catch(e) {}
+                    }
+                }
+
             } catch(e) {
                 removeTyping();
                 addMessage('assistant', '❌ Error de conexión. Intenta de nuevo.');
             }
+
             document.getElementById('send-btn').disabled = false;
             input.focus();
         }
