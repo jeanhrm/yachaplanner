@@ -1,8 +1,7 @@
 #!/bin/bash
-set -e
 echo "=== Running migrations ==="
-php artisan migrate --force
+php artisan migrate --force 2>&1
 echo "=== Running seeders ==="
-php artisan db:seed --force
+php artisan db:seed --force 2>&1
 echo "=== Starting server ==="
-php artisan serve --host=0.0.0.0 --port=8080
+exec php artisan serve --host=0.0.0.0 --port=8080
