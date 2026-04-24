@@ -70,18 +70,34 @@
         {{-- Sidebar --}}
         <div class="yp-sidebar" style="width:260px;">
 
-            {{-- Módulos --}}
+            {{-- Entregable --}}
             <div class="yp-card">
-                <div class="yp-card-title">Módulos</div>
+                <div class="yp-card-title">¿Qué documento necesitas?</div>
+                <p style="font-size:11px;color:#9ca3af;margin-bottom:10px;line-height:1.5;">
+                    Configura tu contexto primero. Luego elige el entregable.
+                </p>
                 @php
                     $icons = ['bimestral'=>'📅','sesion'=>'📝','abp'=>'🔬','rubrica'=>'✅'];
+                    $descs = [
+                        'bimestral' => 'Planificación de todo el bimestre',
+                        'sesion'    => 'Una sesión de aprendizaje',
+                        'abp'       => 'Proyecto interdisciplinario',
+                        'rubrica'   => 'Rúbrica de evaluación',
+                    ];
                 @endphp
                 @foreach($modules as $module)
-                <button onclick="selectModule('{{ $module->slug }}', '{{ $module->name }}')"
+                <button onclick="selectModulo('{{ $module->slug }}', '{{ $module->name }}')"
                     id="btn-{{ $module->slug }}"
                     class="mod-btn">
-                    <span class="mod-icon">{{ $icons[$module->slug] ?? '📄' }}</span>
-                    {{ $module->name }}
+                    <div>
+                        <div style="display:flex;align-items:center;gap:6px;">
+                            <span class="mod-icon">{{ $icons[$module->slug] ?? '📄' }}</span>
+                            <span>{{ $module->name }}</span>
+                        </div>
+                        <div style="font-size:11px;color:#9ca3af;margin-top:2px;padding-left:22px;">
+                            {{ $descs[$module->slug] ?? '' }}
+                        </div>
+                    </div>
                 </button>
                 @endforeach
             </div>
@@ -243,19 +259,141 @@
 
         marked.setOptions({ breaks: true, gfm: true });
 
-        function selectModule(slug, name) {
+        function selectModulo(slug, name) {
             currentModule = slug;
             currentSessionId = null;
-            document.getElementById('current-module-name').textContent = name;
-            document.getElementById('module-label').textContent = name;
-            const badge = document.getElementById('module-badge');
-            badge.textContent = 'activo';
-            badge.style.display = 'inline';
+
             document.querySelectorAll('.mod-btn').forEach(b => b.classList.remove('active'));
             document.getElementById('btn-' + slug).classList.add('active');
-            document.getElementById('messages').innerHTML =
-                `<div class="welcome-msg"><p>Módulo <em>${name}</em> activado.<br>¿Qué necesitas crear?</p></div>`;
             document.getElementById('export-btn').style.display = 'none';
+
+            // Leer contexto configurado
+            const nivel     = document.getElementById('ctx-nivel').value;
+            const grado     = document.getElementById('ctx-grado').value;
+            const situacion = document.getElementById('ctx-situacion').value.trim();
+            const equipo    = document.getElementById('ctx-equipo').value;
+            const met       = document.getElementById('ctx-metodologia').value;
+
+            const tieneContexto = nivel || situacion || equipo;
+
+            let mensaje = '';
+
+            if (!tieneContexto) {
+                // Sin contexto — mensaje genérico
+                mensaje = `
+                    <div class="welcome-msg">
+                        <p>Seleccionaste <em>${name}</em>.</p>
+                        <p style="margin-top:8px;">Configura tu contexto en el panel izquierdo para que Claude genere una propuesta personalizada, o escribe directamente tu solicitud.</p>
+                    </div>`;
+            } else {
+                // Con contexto — Claude genera sugerencia automática
+                generarSugerencia(slug, name, nivel, grado, situacion, equipo, met);
+                return;
+            }
+
+            document.getElementById('messages').innerHTML = mensaje;
+            document.getElementById('module-label').textContent = name;
+            document.getElementById('user-input').focus();
+        }
+
+        async function generarSugerencia(slug, name, nivel, grado, situacion, equipo, met) {
+            document.getElementById('module-label').textContent = name;
+            document.getElementById('messages').innerHTML = '';
+            showTyping();
+
+            // Construir prompt de sugerencia
+            let promptSugerencia = `Eres YachaPlanner, asistente pedagógico STEAM para docentes de Huancavelica, Perú.
+
+        Un docente acaba de configurar este contexto:
+        - Nivel: ${nivel || 'no especificado'}
+        - Grado: ${grado || 'no especificado'}
+        - Situación o problema a trabajar: ${situacion || 'no especificado'}
+        - Forma de trabajo: ${
+            equipo === 'solo' ? 'trabaja solo' :
+            equipo === 'con-otro' ? 'coordina con otro docente' :
+            equipo === 'equipo' ? 'proyecto con equipo docente interdisciplinario' :
+            'no especificado'
+        }
+        - Metodología preferida: ${met || 'no especificada — sugerir la más apropiada'}
+        - Documento que necesita: ${name}
+
+        En máximo 4 líneas:
+        1. Valida el contexto con entusiasmo y menciona el potencial pedagógico
+        2. Sugiere qué áreas curriculares se articulan naturalmente con esta situación
+        3. Si trabaja en equipo, menciona cómo coordinar con otros docentes
+        4. Pregunta una sola cosa para arrancar — algo concreto y específico
+
+        Responde en español, tono cálido y motivador. Sin markdown, sin listas, solo párrafo conversacional.`;
+
+            try {
+                const res = await fetch('{{ route("chat.store") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        module: slug,
+                        message: promptSugerencia,
+                        session_id: null,
+                        _es_sugerencia: true,
+                    })
+                });
+
+                const reader = res.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = '';
+                let fullReply = '';
+                let botBubble = null;
+
+                removeTyping();
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    buffer += decoder.decode(value, { stream: true });
+                    const lines = buffer.split('\n');
+                    buffer = lines.pop();
+
+                    for (const line of lines) {
+                        if (!line.startsWith('data: ')) continue;
+                        const json = line.slice(6).trim();
+                        if (!json) continue;
+
+                        try {
+                            const data = JSON.parse(json);
+
+                            if (data.chunk !== undefined) {
+                                fullReply += data.chunk;
+                                if (!botBubble) {
+                                    const msgs = document.getElementById('messages');
+                                    const wrap = document.createElement('div');
+                                    wrap.className = 'msg-bot';
+                                    wrap.innerHTML = `<div class="bot-avatar">🌱</div><div class="bubble-bot" id="streaming-bubble"></div>`;
+                                    msgs.appendChild(wrap);
+                                    botBubble = document.getElementById('streaming-bubble');
+                                }
+                                botBubble.innerHTML = marked.parse(fullReply);
+                                document.getElementById('messages').scrollTop = 99999;
+                            }
+
+                            if (data.done) {
+                                currentSessionId = data.session_id;
+                                document.getElementById('credits-count').textContent = data.credits_remaining;
+                                document.getElementById('export-btn').style.display = 'inline';
+                                if (botBubble) botBubble.id = '';
+                            }
+                        } catch(e) {}
+                    }
+                }
+
+            } catch(e) {
+                removeTyping();
+                document.getElementById('messages').innerHTML =
+                    '<div class="welcome-msg"><p>Escribe tu solicitud para comenzar.</p></div>';
+            }
+
             document.getElementById('user-input').focus();
         }
 
