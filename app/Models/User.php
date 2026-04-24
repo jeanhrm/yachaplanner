@@ -21,6 +21,7 @@ class User extends Authenticatable
         'plan', 'plan_expires_at',
         'weekly_credits_used', 'weekly_credits_limit',
         'credits_reset_at', 'preferences', 'locale',
+        'ugel', 'nivel', 'area_docente', 'institucion',
     ];
 
     protected $hidden = [
