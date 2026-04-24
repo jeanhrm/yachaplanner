@@ -184,18 +184,6 @@
                     Selecciona tu área en la barra superior para ver los documentos disponibles.
                 </div>
             </div>
-
-            {{-- Recientes --}}
-            @if($sessions->count())
-            <div class="section-divider" style="margin-top:8px;">Recientes</div>
-            @foreach($sessions as $session)
-            <button onclick="loadSession({{ $session->id }}, '{{ $session->module }}')"
-                style="width:100%;text-align:left;padding:7px 10px;border-radius:6px;font-size:12px;color:#6b7280;background:transparent;border:none;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"
-                title="{{ $session->title }}">
-                📄 {{ $session->title ?? 'Sin título' }}
-            </button>
-            @endforeach
-            @endif
         </div>
 
         {{-- Chat principal --}}
