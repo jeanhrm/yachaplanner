@@ -1,43 +1,149 @@
 <x-app-layout>
-    <x-slot name="header">
-        <div style="display:flex;align-items:center;justify-content:space-between;">
-            <h2 style="font-size:18px;font-weight:600;color:#111827;">
-                🌱 YachaPlanner — Asistente STEAM
-            </h2>
-            <span style="font-size:13px;color:#6b7280;">
-                Créditos disponibles esta semana:
-                <strong id="credits-count" style="color:#059669;">{{ auth()->user()->remainingCredits() }}</strong>
-            </span>
+    <x-slot name="header" style="padding:0;">
+        {{-- Barra de contexto pedagógico --}}
+        <div style="background:#fff;border-bottom:1px solid #e5e7eb;padding:10px 24px;">
+            <div style="max-width:1280px;margin:0 auto;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+
+                {{-- Nivel --}}
+                <div style="display:flex;align-items:center;gap:6px;">
+                    <label style="font-size:11px;font-weight:600;color:#6b7280;white-space:nowrap;">Nivel</label>
+                    <select id="ctx-nivel" onchange="updateGrados()" style="border:1px solid #e5e7eb;border-radius:6px;padding:5px 8px;font-size:13px;color:#374151;background:#fff;">
+                        <option value="">— Seleccionar —</option>
+                        <option value="Primaria">Primaria</option>
+                        <option value="Secundaria">Secundaria</option>
+                    </select>
+                </div>
+
+                <div style="width:1px;height:24px;background:#e5e7eb;"></div>
+
+                {{-- Grado --}}
+                <div style="display:flex;align-items:center;gap:6px;">
+                    <label style="font-size:11px;font-weight:600;color:#6b7280;white-space:nowrap;">Grado</label>
+                    <select id="ctx-grado" style="border:1px solid #e5e7eb;border-radius:6px;padding:5px 8px;font-size:13px;color:#374151;background:#fff;">
+                        <option value="">— Primero nivel —</option>
+                    </select>
+                </div>
+
+                <div style="width:1px;height:24px;background:#e5e7eb;"></div>
+
+                {{-- Área del docente --}}
+                <div style="display:flex;align-items:center;gap:6px;">
+                    <label style="font-size:11px;font-weight:600;color:#6b7280;white-space:nowrap;">Tu área</label>
+                    <select id="ctx-area-docente" onchange="updateDocumentos(); checkAreaDocente()" style="border:1px solid #e5e7eb;border-radius:6px;padding:5px 8px;font-size:13px;color:#374151;background:#fff;">
+                        <option value="">— Seleccionar —</option>
+                        <option value="Todas las áreas (primaria)">Todas las áreas (tutor)</option>
+                        <optgroup label="Secundaria">
+                            <option value="Matemática">Matemática</option>
+                            <option value="Comunicación">Comunicación</option>
+                            <option value="Ciencia y Tecnología">Ciencia y Tecnología</option>
+                            <option value="Personal Social">Personal Social</option>
+                            <option value="Historia, Geografía y Economía">Historia, Geografía y Economía</option>
+                            <option value="Desarrollo Personal y Cívica">Desarrollo Personal y Cívica</option>
+                            <option value="Arte y Cultura">Arte y Cultura</option>
+                            <option value="Educación Física">Educación Física</option>
+                            <option value="Inglés">Inglés</option>
+                            <option value="Educación para el Trabajo">Educación para el Trabajo</option>
+                            <option value="Educación Religiosa">Educación Religiosa</option>
+                        </optgroup>
+                    </select>
+                </div>
+
+                <div style="width:1px;height:24px;background:#e5e7eb;"></div>
+
+                {{-- ¿Con quién trabajas? --}}
+                <div style="display:flex;align-items:center;gap:6px;">
+                    <label style="font-size:11px;font-weight:600;color:#6b7280;white-space:nowrap;">Trabajo</label>
+                    <div style="display:flex;gap:4px;">
+                        <button onclick="selectEquipo(this,'solo')" id="eq-solo"
+                            style="padding:5px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:12px;color:#374151;background:#fff;cursor:pointer;">
+                            👤 Solo
+                        </button>
+                        <button onclick="selectEquipo(this,'con-otro')" id="eq-con-otro"
+                            style="padding:5px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:12px;color:#374151;background:#fff;cursor:pointer;">
+                            👥 Con colega
+                        </button>
+                        <button onclick="selectEquipo(this,'equipo')" id="eq-equipo"
+                            style="padding:5px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:12px;color:#374151;background:#fff;cursor:pointer;">
+                            🏫 Equipo
+                        </button>
+                    </div>
+                    <input type="hidden" id="ctx-equipo" value="">
+                </div>
+
+                <div style="width:1px;height:24px;background:#e5e7eb;"></div>
+
+                {{-- Metodología --}}
+                <div style="display:flex;align-items:center;gap:6px;">
+                    <label style="font-size:11px;font-weight:600;color:#6b7280;white-space:nowrap;">Metodología</label>
+                    <select id="ctx-metodologia" onchange="checkMetodologia()" style="border:1px solid #e5e7eb;border-radius:6px;padding:5px 8px;font-size:13px;color:#374151;background:#fff;max-width:200px;">
+                        <option value="">— Claude sugiere —</option>
+                        <optgroup label="Proyectos">
+                            <option value="ABP">ABP</option>
+                            <option value="ABR">ABR</option>
+                            <option value="Design Thinking">Design Thinking</option>
+                            <option value="STEAM integrado">STEAM Integrado</option>
+                        </optgroup>
+                        <optgroup label="Indagación">
+                            <option value="Indagación científica 5E">Indagación 5E</option>
+                            <option value="Aprendizaje por descubrimiento">Por descubrimiento</option>
+                            <option value="Estudio de casos">Estudio de casos</option>
+                        </optgroup>
+                        <optgroup label="Colaborativas">
+                            <option value="Aprendizaje cooperativo">Cooperativo</option>
+                            <option value="Aula invertida">Aula invertida</option>
+                            <option value="Tutoría entre pares">Tutoría entre pares</option>
+                        </optgroup>
+                        <optgroup label="Contexto andino">
+                            <option value="Aprendizaje-Servicio">Aprendizaje-Servicio</option>
+                            <option value="Etnociencia">Etnociencia</option>
+                            <option value="Aprendizaje situado">Situado en comunidad</option>
+                        </optgroup>
+                    </select>
+                </div>
+
+                {{-- Créditos --}}
+                <div style="margin-left:auto;font-size:12px;color:#6b7280;white-space:nowrap;">
+                    Créditos: <strong id="credits-count" style="color:#059669;">{{ auth()->user()->remainingCredits() }}</strong>
+                </div>
+
+            </div>
+
+            {{-- Alertas contexto --}}
+            <div id="ctx-alertas" style="max-width:1280px;margin:0 auto;margin-top:6px;display:flex;gap:8px;flex-wrap:wrap;">
+                <div id="info-area-docente" style="display:none;background:#f0fdf4;border:1px solid #a7f3d0;border-radius:6px;padding:5px 10px;font-size:11px;color:#065f46;"></div>
+                <div id="info-metodologia" style="display:none;background:#fffbeb;border:1px solid #fde68a;border-radius:6px;padding:5px 10px;font-size:11px;color:#92400e;"></div>
+                <div id="alerta-equipo" style="display:none;background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;padding:5px 10px;font-size:11px;color:#1e40af;"></div>
+            </div>
         </div>
     </x-slot>
 
     <style>
         * { box-sizing: border-box; }
-        .yp-layout { display: flex; gap: 16px; height: calc(100vh - 130px); padding: 16px 24px; max-width: 1280px; margin: 0 auto; }
-        .yp-sidebar { width: 220px; flex-shrink: 0; display: flex; flex-direction: column; gap: 12px; }
-        .yp-card { background: #fff; border-radius: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); padding: 14px; }
-        .yp-card-title { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #9ca3af; margin-bottom: 10px; }
-        .mod-btn { width: 100%; text-align: left; padding: 9px 12px; border-radius: 8px; font-size: 13px; color: #374151; background: transparent; border: none; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; gap: 8px; }
-        .mod-btn:hover { background: #f0fdf4; color: #059669; }
-        .mod-btn.active { background: #059669; color: #fff; font-weight: 500; }
-        .mod-btn .mod-icon { font-size: 14px; }
-        .recent-btn { width: 100%; text-align: left; padding: 7px 10px; border-radius: 6px; font-size: 12px; color: #6b7280; background: transparent; border: none; cursor: pointer; transition: background 0.12s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .recent-btn:hover { background: #f9fafb; color: #111827; }
-        .yp-main { flex: 1; display: flex; flex-direction: column; background: #fff; border-radius: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); overflow: hidden; }
-        .yp-chat-header { padding: 12px 16px; border-bottom: 1px solid #f3f4f6; background: #fafafa; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
-        .yp-module-label { font-size: 13px; font-weight: 500; color: #374151; display: flex; align-items: center; gap: 8px; }
-        .yp-module-badge { background: #d1fae5; color: #065f46; font-size: 11px; padding: 2px 8px; border-radius: 20px; font-weight: 500; }
-        .new-chat-btn { font-size: 12px; color: #9ca3af; background: none; border: 1px solid #e5e7eb; border-radius: 6px; padding: 4px 10px; cursor: pointer; transition: all 0.12s; }
-        .new-chat-btn:hover { color: #374151; border-color: #d1d5db; }
+        .yp-layout { display: flex; gap: 0; height: calc(100vh - 130px); max-width: 1280px; margin: 0 auto; }
+        .yp-sidebar { width: 240px; flex-shrink: 0; background: #f9fafb; border-right: 1px solid #e5e7eb; overflow-y: auto; padding: 16px 12px; display: flex; flex-direction: column; gap: 8px; }
+        .sidebar-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #9ca3af; margin-bottom: 4px; padding: 0 4px; }
+        .doc-btn { width: 100%; text-align: left; padding: 10px 12px; border-radius: 8px; font-size: 13px; color: #374151; background: transparent; border: none; cursor: pointer; transition: all 0.15s; display: flex; flex-direction: column; gap: 2px; }
+        .doc-btn:hover { background: #f0fdf4; color: #059669; }
+        .doc-btn.active { background: #059669; color: #fff; }
+        .doc-btn.active .doc-desc { color: #d1fae5; }
+        .doc-btn-header { display: flex; align-items: center; gap: 8px; font-weight: 500; }
+        .doc-desc { font-size: 11px; color: #9ca3af; padding-left: 22px; }
+        .doc-tag { display: inline-block; margin-top: 4px; margin-left: 22px; font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 10px; }
+        .tag-steam { background: #d1fae5; color: #065f46; }
+        .tag-inter { background: #ede9fe; color: #5b21b6; }
+        .tag-basica { background: #f3f4f6; color: #6b7280; }
+        .yp-main { flex: 1; display: flex; flex-direction: column; background: #fff; overflow: hidden; }
+        .yp-chat-header { padding: 10px 16px; border-bottom: 1px solid #f3f4f6; background: #fafafa; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+        .yp-module-label { font-size: 13px; font-weight: 500; color: #374151; }
         #messages { flex: 1; overflow-y: auto; padding: 20px 16px; display: flex; flex-direction: column; gap: 16px; scroll-behavior: smooth; }
         .msg-user { display: flex; justify-content: flex-end; }
-        .msg-bot  { display: flex; justify-content: flex-start; align-items: flex-start; gap: 10px; }
+        .msg-bot { display: flex; justify-content: flex-start; align-items: flex-start; gap: 10px; }
         .bot-avatar { width: 32px; height: 32px; border-radius: 50%; background: #d1fae5; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
         .bubble-user { background: #059669; color: #fff; padding: 10px 14px; border-radius: 18px 18px 4px 18px; font-size: 14px; line-height: 1.6; max-width: 70%; }
-        .bubble-bot  { background: #f3f4f6; color: #111827; padding: 12px 16px; border-radius: 4px 18px 18px 18px; font-size: 14px; line-height: 1.7; max-width: 80%; }
-        .bubble-bot h2, .bubble-bot h3 { font-size: 14px; font-weight: 600; margin: 12px 0 6px; color: #059669; }
+        .bubble-bot { background: #f3f4f6; color: #111827; padding: 12px 16px; border-radius: 4px 18px 18px 18px; font-size: 14px; line-height: 1.7; max-width: 82%; }
+        .bubble-bot h2,.bubble-bot h3 { font-size: 14px; font-weight: 600; margin: 12px 0 6px; color: #059669; }
         .bubble-bot h4 { font-size: 13px; font-weight: 600; margin: 10px 0 4px; color: #374151; }
-        .bubble-bot ul, .bubble-bot ol { padding-left: 18px; margin: 6px 0; }
+        .bubble-bot ul,.bubble-bot ol { padding-left: 18px; margin: 6px 0; }
         .bubble-bot li { margin-bottom: 3px; }
         .bubble-bot table { width: 100%; border-collapse: collapse; font-size: 12px; margin: 8px 0; }
         .bubble-bot th { background: #059669; color: #fff; padding: 6px 10px; text-align: left; font-weight: 500; }
@@ -59,193 +165,76 @@
         #send-btn:hover { background: #047857; }
         #send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
         .yp-hint { font-size: 11px; color: #9ca3af; margin-top: 6px; }
-        .welcome-msg { text-align: center; color: #9ca3af; margin: auto; }
+        .welcome-msg { text-align: center; color: #9ca3af; margin: auto; padding: 40px 20px; }
         .welcome-msg .w-icon { font-size: 48px; margin-bottom: 12px; }
+        .welcome-msg h3 { font-size: 16px; font-weight: 600; color: #374151; margin-bottom: 8px; }
         .welcome-msg p { font-size: 14px; line-height: 1.6; }
         .welcome-msg em { color: #059669; font-style: normal; font-weight: 500; }
+        .section-divider { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #d1d5db; padding: 8px 4px 4px; }
     </style>
 
     <div class="yp-layout">
 
-        {{-- Sidebar --}}
-        <div class="yp-sidebar" style="width:260px;">
-
-            {{-- Entregable --}}
-            <div class="yp-card">
-                <div class="yp-card-title">¿Qué documento necesitas?</div>
-                <p style="font-size:11px;color:#9ca3af;margin-bottom:10px;line-height:1.5;">
-                    Configura tu contexto primero. Luego elige el entregable.
-                </p>
-                @php
-                    $icons = ['bimestral'=>'📅','sesion'=>'📝','abp'=>'🔬','rubrica'=>'✅'];
-                    $descs = [
-                        'bimestral' => 'Planificación de todo el bimestre',
-                        'sesion'    => 'Una sesión de aprendizaje',
-                        'abp'       => 'Proyecto interdisciplinario',
-                        'rubrica'   => 'Rúbrica de evaluación',
-                    ];
-                @endphp
-                @foreach($modules as $module)
-                <button onclick="selectModulo('{{ $module->slug }}', '{{ $module->name }}')"
-                    id="btn-{{ $module->slug }}"
-                    class="mod-btn">
-                    <div>
-                        <div style="display:flex;align-items:center;gap:6px;">
-                            <span class="mod-icon">{{ $icons[$module->slug] ?? '📄' }}</span>
-                            <span>{{ $module->name }}</span>
-                        </div>
-                        <div style="font-size:11px;color:#9ca3af;margin-top:2px;padding-left:22px;">
-                            {{ $descs[$module->slug] ?? '' }}
-                        </div>
-                    </div>
-                </button>
-                @endforeach
+        {{-- Sidebar: Documentos --}}
+        <div class="yp-sidebar">
+            <div class="sidebar-title">¿Qué documento necesitas?</div>
+            <div id="doc-list">
+                {{-- Se genera dinámicamente por JS según área --}}
+                <div style="font-size:12px;color:#9ca3af;padding:8px 4px;line-height:1.5;">
+                    Selecciona tu área en la barra superior para ver los documentos disponibles.
+                </div>
             </div>
-
-            {{-- Contexto pedagógico --}}
-            <div class="yp-card" style="display:flex;flex-direction:column;gap:10px;">
-                <div class="yp-card-title">¿Cómo quieres trabajar?</div>
-
-                {{-- Nivel --}}
-                <div>
-                    <label style="font-size:11px;font-weight:600;color:#6b7280;display:block;margin-bottom:4px;">Nivel educativo</label>
-                    <select id="ctx-nivel" onchange="updateGrados()" style="width:100%;border:1px solid #e5e7eb;border-radius:6px;padding:6px 8px;font-size:13px;color:#374151;background:#fff;">
-                        <option value="">— Seleccionar —</option>
-                        <option value="Primaria">Primaria</option>
-                        <option value="Secundaria">Secundaria</option>
-                    </select>
-                </div>
-
-                {{-- Grado --}}
-                <div>
-                    <label style="font-size:11px;font-weight:600;color:#6b7280;display:block;margin-bottom:4px;">Grado</label>
-                    <select id="ctx-grado" style="width:100%;border:1px solid #e5e7eb;border-radius:6px;padding:6px 8px;font-size:13px;color:#374151;background:#fff;">
-                        <option value="">— Primero el nivel —</option>
-                    </select>
-                </div>
-
-                {{-- Situación o problema --}}
-                <div>
-                    <label style="font-size:11px;font-weight:600;color:#6b7280;display:block;margin-bottom:4px;">
-                        ¿Qué situación o problema quieres trabajar?
-                    </label>
-                    <textarea id="ctx-situacion" rows="2"
-                        placeholder="Ej: contaminación del río Ichu, heladas, feria de la papa..."
-                        style="width:100%;border:1px solid #e5e7eb;border-radius:6px;padding:6px 8px;font-size:12px;color:#374151;resize:none;font-family:inherit;line-height:1.5;"></textarea>
-                    <div style="font-size:11px;color:#9ca3af;margin-top:3px;">Claude sugerirá qué áreas se articulan naturalmente.</div>
-                </div>
-
-                {{-- ¿Con quién trabajas? --}}
-                <div>
-                    <label style="font-size:11px;font-weight:600;color:#6b7280;display:block;margin-bottom:6px;">¿Con quién trabajas?</label>
-                    <div style="display:flex;flex-direction:column;gap:6px;" id="ctx-equipo-options">
-                        <label style="display:flex;align-items:flex-start;gap:8px;cursor:pointer;padding:8px;border:1px solid #e5e7eb;border-radius:8px;font-size:12px;color:#374151;transition:all 0.15s;" onclick="selectEquipo(this, 'solo')">
-                            <span style="margin-top:1px;">👤</span>
-                            <span><strong>Solo</strong><br><span style="color:#9ca3af;">Soy el único docente de este grupo</span></span>
-                        </label>
-                        <label style="display:flex;align-items:flex-start;gap:8px;cursor:pointer;padding:8px;border:1px solid #e5e7eb;border-radius:8px;font-size:12px;color:#374151;transition:all 0.15s;" onclick="selectEquipo(this, 'con-otro')">
-                            <span style="margin-top:1px;">👥</span>
-                            <span><strong>Con otro docente</strong><br><span style="color:#9ca3af;">Coordinamos entre 2 áreas</span></span>
-                        </label>
-                        <label style="display:flex;align-items:flex-start;gap:8px;cursor:pointer;padding:8px;border:1px solid #e5e7eb;border-radius:8px;font-size:12px;color:#374151;transition:all 0.15s;" onclick="selectEquipo(this, 'equipo')">
-                            <span style="margin-top:1px;">🏫</span>
-                            <span><strong>Equipo docente</strong><br><span style="color:#9ca3af;">Proyecto interdisciplinario con varios colegas</span></span>
-                        </label>
-                    </div>
-                    <input type="hidden" id="ctx-equipo" value="">
-                </div>
-
-                {{-- Metodología --}}
-                <div>
-                    <label style="font-size:11px;font-weight:600;color:#6b7280;display:block;margin-bottom:4px;">Metodología (opcional)</label>
-                    <select id="ctx-metodologia" onchange="checkMetodologia()" style="width:100%;border:1px solid #e5e7eb;border-radius:6px;padding:6px 8px;font-size:13px;color:#374151;background:#fff;">
-                        <option value="">— Dejar que Claude sugiera —</option>
-                        <optgroup label="Proyectos">
-                            <option value="ABP">ABP — Aprendizaje Basado en Proyectos</option>
-                            <option value="ABR">ABR — Aprendizaje Basado en Retos</option>
-                            <option value="Design Thinking">Design Thinking</option>
-                            <option value="STEAM integrado">STEAM Integrado</option>
-                        </optgroup>
-                        <optgroup label="Indagación">
-                            <option value="Indagación científica 5E">Indagación científica (5E)</option>
-                            <option value="Aprendizaje por descubrimiento">Aprendizaje por descubrimiento</option>
-                            <option value="Estudio de casos">Estudio de casos</option>
-                        </optgroup>
-                        <optgroup label="Colaborativas">
-                            <option value="Aprendizaje cooperativo">Aprendizaje cooperativo</option>
-                            <option value="Aula invertida">Aula invertida (Flipped)</option>
-                            <option value="Tutoría entre pares">Tutoría entre pares</option>
-                        </optgroup>
-                        <optgroup label="Contexto andino">
-                            <option value="Aprendizaje-Servicio">Aprendizaje-Servicio</option>
-                            <option value="Etnociencia">Etnociencia (saberes andinos)</option>
-                            <option value="Aprendizaje situado en la comunidad">Aprendizaje situado en comunidad</option>
-                        </optgroup>
-                    </select>
-                </div>
-
-                {{-- Info metodología --}}
-                <div id="info-metodologia" style="display:none;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:10px;font-size:12px;color:#92400e;line-height:1.5;">
-                    <span id="info-texto"></span>
-                </div>
-
-                {{-- Alerta equipo --}}
-                <div id="alerta-equipo" style="display:none;background:#f0fdf4;border:1px solid #a7f3d0;border-radius:8px;padding:10px;font-size:12px;color:#065f46;line-height:1.5;">
-                    <span id="alerta-equipo-texto"></span>
-                </div>
-
-            </div>
-
-
 
             {{-- Recientes --}}
             @if($sessions->count())
-            <div class="yp-card">
-                <div class="yp-card-title">Recientes</div>
-                @foreach($sessions as $session)
-                <button onclick="loadSession({{ $session->id }}, '{{ $session->module }}')"
-                    class="recent-btn" title="{{ $session->title }}">
-                    {{ $session->title ?? 'Sin título' }}
-                </button>
-                @endforeach
-            </div>
+            <div class="section-divider" style="margin-top:8px;">Recientes</div>
+            @foreach($sessions as $session)
+            <button onclick="loadSession({{ $session->id }}, '{{ $session->module }}')"
+                style="width:100%;text-align:left;padding:7px 10px;border-radius:6px;font-size:12px;color:#6b7280;background:transparent;border:none;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"
+                title="{{ $session->title }}">
+                📄 {{ $session->title ?? 'Sin título' }}
+            </button>
+            @endforeach
             @endif
         </div>
-
 
         {{-- Chat principal --}}
         <div class="yp-main">
             <div class="yp-chat-header">
-                <div class="yp-module-label">
-                    <span id="current-module-name">Selecciona un módulo</span>
-                    <span id="module-badge" class="yp-module-badge" style="display:none"></span>
-                </div>
+                <span id="current-module-name" class="yp-module-label">Selecciona un documento para comenzar</span>
                 <div style="display:flex;gap:8px;align-items:center;">
                     <button id="export-btn" onclick="exportWord()"
                         style="display:none;font-size:12px;color:#1a7a4a;background:#f0fdf4;border:1px solid #a7f3d0;border-radius:6px;padding:5px 12px;cursor:pointer;">
                         ⬇ Exportar Word
                     </button>
-                    <button onclick="newChat()" class="new-chat-btn">+ Nueva sesión</button>
+                    <button onclick="newChat()"
+                        style="font-size:12px;color:#9ca3af;background:none;border:1px solid #e5e7eb;border-radius:6px;padding:4px 10px;cursor:pointer;">
+                        + Nueva sesión
+                    </button>
                 </div>
             </div>
 
             <div id="messages">
                 <div class="welcome-msg">
                     <div class="w-icon">🌱</div>
-                    <p>Selecciona un módulo y escribe tu solicitud.<br>
-                    Ejemplo: <em>"Prog. bimestral de CyT para 4to primaria"</em></p>
+                    <h3>Bienvenido a YachaPlanner</h3>
+                    <p>
+                        1. Configura tu contexto en la barra superior<br>
+                        2. Elige el documento que necesitas en el panel izquierdo<br>
+                        3. Claude generará una propuesta personalizada para ti
+                    </p>
                 </div>
             </div>
 
             <div class="yp-input-area">
                 <div class="yp-input-row">
                     <textarea id="user-input" rows="2"
-                        placeholder="Escribe tu solicitud pedagógica..."
+                        placeholder="Describe la situación o problema que quieres trabajar con tus estudiantes..."
                         onkeydown="handleKey(event)"></textarea>
                     <button id="send-btn" onclick="sendMessage()">Enviar ➤</button>
                 </div>
                 <div class="yp-hint">
-                    Módulo: <span id="module-label" style="color:#059669;font-weight:500;">ninguno</span> ·
+                    Documento: <span id="module-label" style="color:#059669;font-weight:500;">ninguno seleccionado</span> ·
                     Enter para enviar · Shift+Enter para nueva línea
                 </div>
             </div>
@@ -256,114 +245,305 @@
     <script>
         let currentModule = null;
         let currentSessionId = null;
+        let equipoSeleccionado = '';
 
         marked.setOptions({ breaks: true, gfm: true });
 
-        function selectModulo(slug, name) {
-            currentModule = slug;
-            currentSessionId = null;
+        // ===== DOCUMENTOS POR ÁREA =====
+        const documentosPorArea = {
+            'Todas las áreas (primaria)': [
+                { slug:'sesion',    icon:'📝', name:'Sesión de Aprendizaje',     desc:'Secuencia didáctica completa',         tag:'basica' },
+                { slug:'bimestral', icon:'📅', name:'Programación Bimestral',    desc:'Planificación de todo el bimestre',    tag:'basica' },
+                { slug:'abp',       icon:'🔬', name:'Proyecto STEAM / ABP',      desc:'Proyecto interdisciplinario',          tag:'inter'  },
+                { slug:'rubrica',   icon:'✅', name:'Rúbrica de Evaluación',     desc:'Criterios AD/A/B/C',                  tag:'basica' },
+            ],
+            'Matemática': [
+                { slug:'sesion',    icon:'📝', name:'Sesión de Aprendizaje',     desc:'Resolución de problemas contextualizados', tag:'basica' },
+                { slug:'bimestral', icon:'📅', name:'Programación Bimestral',    desc:'Secuencia de competencias matemáticas',    tag:'basica' },
+                { slug:'abp',       icon:'🔬', name:'Proyecto Matemático',       desc:'Estadística comunitaria, diseño, economía',tag:'inter'  },
+                { slug:'rubrica',   icon:'✅', name:'Rúbrica de Evaluación',     desc:'Criterios por competencia matemática',     tag:'basica' },
+            ],
+            'Comunicación': [
+                { slug:'sesion',    icon:'📝', name:'Sesión de Aprendizaje',     desc:'Comprensión y producción de textos',       tag:'basica' },
+                { slug:'bimestral', icon:'📅', name:'Programación Bimestral',    desc:'Secuencia de competencias comunicativas',   tag:'basica' },
+                { slug:'abp',       icon:'📰', name:'Proyecto Comunicativo',     desc:'Periódico escolar, podcast, feria del libro',tag:'inter' },
+                { slug:'rubrica',   icon:'✅', name:'Rúbrica de Evaluación',     desc:'Criterios de producción y comprensión',     tag:'basica' },
+            ],
+            'Ciencia y Tecnología': [
+                { slug:'sesion',    icon:'📝', name:'Sesión de Indagación',      desc:'Ciclo 5E contextualizado al entorno andino', tag:'steam' },
+                { slug:'bimestral', icon:'📅', name:'Programación Bimestral',    desc:'Secuencia de competencias científicas',      tag:'basica' },
+                { slug:'abp',       icon:'🔬', name:'Proyecto STEAM',            desc:'Agua, biodiversidad, salud, energía',        tag:'steam' },
+                { slug:'rubrica',   icon:'✅', name:'Rúbrica de Indagación',     desc:'Criterios del proceso científico',           tag:'steam' },
+            ],
+            'Personal Social': [
+                { slug:'sesion',    icon:'📝', name:'Sesión de Aprendizaje',     desc:'Identidad, ciudadanía, convivencia',         tag:'basica' },
+                { slug:'bimestral', icon:'📅', name:'Programación Bimestral',    desc:'Secuencia de competencias sociales',         tag:'basica' },
+                { slug:'abp',       icon:'🏘️', name:'Proyecto Ciudadano',        desc:'Participación, derechos, historia local',    tag:'inter'  },
+                { slug:'rubrica',   icon:'✅', name:'Rúbrica de Evaluación',     desc:'Criterios de convivencia y ciudadanía',      tag:'basica' },
+            ],
+            'Historia, Geografía y Economía': [
+                { slug:'sesion',    icon:'📝', name:'Sesión de Aprendizaje',     desc:'Historia local, territorio, economía andina',tag:'basica' },
+                { slug:'bimestral', icon:'📅', name:'Programación Bimestral',    desc:'Secuencia de competencias histórico-sociales',tag:'basica'},
+                { slug:'abp',       icon:'🗺️', name:'Proyecto Territorial',      desc:'Mapeo comunitario, economía local, historia',tag:'inter' },
+                { slug:'rubrica',   icon:'✅', name:'Rúbrica de Evaluación',     desc:'Criterios de pensamiento histórico',         tag:'basica' },
+            ],
+            'Desarrollo Personal y Cívica': [
+                { slug:'sesion',    icon:'📝', name:'Sesión de Aprendizaje',     desc:'Identidad, ética, participación cívica',     tag:'basica' },
+                { slug:'bimestral', icon:'📅', name:'Programación Bimestral',    desc:'Secuencia de competencias ciudadanas',       tag:'basica' },
+                { slug:'abp',       icon:'🤝', name:'Proyecto de Liderazgo',     desc:'Mediación, derechos, gobierno estudiantil',  tag:'inter'  },
+                { slug:'rubrica',   icon:'✅', name:'Rúbrica de Evaluación',     desc:'Criterios de ciudadanía activa',             tag:'basica' },
+            ],
+            'Arte y Cultura': [
+                { slug:'sesion',    icon:'📝', name:'Sesión de Aprendizaje',     desc:'Expresión artística con identidad andina',   tag:'basica' },
+                { slug:'bimestral', icon:'📅', name:'Programación Bimestral',    desc:'Secuencia de competencias artísticas',       tag:'basica' },
+                { slug:'abp',       icon:'🎨', name:'Proyecto Arte-STEAM',       desc:'Diseño, danza, música como puente STEAM',   tag:'steam'  },
+                { slug:'rubrica',   icon:'✅', name:'Rúbrica de Evaluación',     desc:'Criterios de expresión y apreciación',      tag:'basica' },
+            ],
+            'Educación Física': [
+                { slug:'sesion',    icon:'📝', name:'Sesión de Aprendizaje',     desc:'Movimiento, salud y bienestar andino',      tag:'basica' },
+                { slug:'bimestral', icon:'📅', name:'Programación Bimestral',    desc:'Secuencia de competencias motrices',        tag:'basica' },
+                { slug:'abp',       icon:'🏃', name:'Proyecto Salud Comunitaria',desc:'Biomecánica, nutrición, bienestar rural',   tag:'steam'  },
+                { slug:'rubrica',   icon:'✅', name:'Rúbrica de Desempeño',      desc:'Criterios de competencia motriz y actitud',  tag:'basica' },
+            ],
+            'Inglés': [
+                { slug:'sesion',    icon:'📝', name:'Sesión de Aprendizaje',     desc:'Comunicación en inglés contextualizada',     tag:'basica' },
+                { slug:'bimestral', icon:'📅', name:'Programación Bimestral',    desc:'Secuencia de competencias comunicativas',    tag:'basica' },
+                { slug:'abp',       icon:'🌐', name:'Proyecto Global',           desc:'Conexión con ciencia y tecnología global',   tag:'inter'  },
+                { slug:'rubrica',   icon:'✅', name:'Rúbrica de Evaluación',     desc:'Criterios de comunicación oral y escrita',   tag:'basica' },
+            ],
+            'Educación para el Trabajo': [
+                { slug:'sesion',    icon:'📝', name:'Sesión de Aprendizaje',     desc:'Competencias técnicas y emprendimiento',     tag:'basica' },
+                { slug:'bimestral', icon:'📅', name:'Programación Bimestral',    desc:'Secuencia de competencias laborales',        tag:'basica' },
+                { slug:'abp',       icon:'💼', name:'Proyecto de Emprendimiento',desc:'Microempresa, economía local, tecnología',   tag:'steam'  },
+                { slug:'rubrica',   icon:'✅', name:'Rúbrica de Evaluación',     desc:'Criterios de desempeño técnico',             tag:'basica' },
+            ],
+            'Educación Religiosa': [
+                { slug:'sesion',    icon:'📝', name:'Sesión de Aprendizaje',     desc:'Valores, ética, espiritualidad andina',      tag:'basica' },
+                { slug:'bimestral', icon:'📅', name:'Programación Bimestral',    desc:'Secuencia de competencias espirituales',     tag:'basica' },
+                { slug:'abp',       icon:'🕊️', name:'Proyecto de Valores',       desc:'Ética comunitaria, interculturalidad',       tag:'inter'  },
+                { slug:'rubrica',   icon:'✅', name:'Rúbrica de Evaluación',     desc:'Criterios de reflexión ética',               tag:'basica' },
+            ],
+        };
 
-            document.querySelectorAll('.mod-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('btn-' + slug).classList.add('active');
-            document.getElementById('export-btn').style.display = 'none';
+        const tagLabels = {
+            steam: { label: 'STEAM', class: 'tag-steam' },
+            inter: { label: 'Interdisciplinar', class: 'tag-inter' },
+            basica: { label: 'Básico', class: 'tag-basica' },
+        };
 
-            // Leer contexto configurado
-            const nivel     = document.getElementById('ctx-nivel').value;
-            const grado     = document.getElementById('ctx-grado').value;
-            const situacion = document.getElementById('ctx-situacion').value.trim();
-            const equipo    = document.getElementById('ctx-equipo').value;
-            const met       = document.getElementById('ctx-metodologia').value;
+        function updateDocumentos() {
+            const area = document.getElementById('ctx-area-docente').value;
+            const docList = document.getElementById('doc-list');
 
-            const tieneContexto = nivel || situacion || equipo;
-
-            let mensaje = '';
-
-            if (!tieneContexto) {
-                // Sin contexto — mensaje genérico
-                mensaje = `
-                    <div class="welcome-msg">
-                        <p>Seleccionaste <em>${name}</em>.</p>
-                        <p style="margin-top:8px;">Configura tu contexto en el panel izquierdo para que Claude genere una propuesta personalizada, o escribe directamente tu solicitud.</p>
-                    </div>`;
-            } else {
-                // Con contexto — Claude genera sugerencia automática
-                generarSugerencia(slug, name, nivel, grado, situacion, equipo, met);
+            if (!area) {
+                docList.innerHTML = '<div style="font-size:12px;color:#9ca3af;padding:8px 4px;line-height:1.5;">Selecciona tu área para ver los documentos disponibles.</div>';
                 return;
             }
 
-            document.getElementById('messages').innerHTML = mensaje;
+            const docs = documentosPorArea[area] || documentosPorArea['Todas las áreas (primaria)'];
+            docList.innerHTML = docs.map(d => {
+                const tag = tagLabels[d.tag];
+                return `
+                    <button onclick="selectModulo('${d.slug}','${d.name}')"
+                        id="btn-${d.slug}"
+                        class="doc-btn">
+                        <div class="doc-btn-header">
+                            <span>${d.icon}</span>
+                            <span>${d.name}</span>
+                        </div>
+                        <div class="doc-desc">${d.desc}</div>
+                        <span class="doc-tag ${tag.class}">${tag.label}</span>
+                    </button>`;
+            }).join('');
+        }
+
+        // ===== CONTEXTO PEDAGÓGICO =====
+        const gradosPrimaria = ['1° Primaria','2° Primaria','3° Primaria','4° Primaria','5° Primaria','6° Primaria'];
+        const gradosSecundaria = ['1° Secundaria','2° Secundaria','3° Secundaria','4° Secundaria','5° Secundaria'];
+
+        const fortalezasPorArea = {
+            'Todas las áreas (primaria)': '✅ Como tutor integras todas las áreas. Tienes ventaja — no necesitas coordinar con nadie para hacer proyectos.',
+            'Matemática': '📐 Matemática puede ser el núcleo de proyectos de medición, estadística comunitaria y economía local.',
+            'Comunicación': '📖 Comunicación articula todo proyecto: investigación, presentación, debate y escritura del informe.',
+            'Ciencia y Tecnología': '🔬 Ciencia es el motor del ABP y la indagación. El entorno andino es tu laboratorio natural.',
+            'Personal Social': '🤝 Tu área conecta proyectos con identidad, ciudadanía e historia local huancavelicana.',
+            'Historia, Geografía y Economía': '🗺️ Conectas el territorio, la economía local y la historia andina con situaciones reales.',
+            'Desarrollo Personal y Cívica': '🏛️ Puedes liderar proyectos de participación ciudadana, derechos y liderazgo estudiantil.',
+            'Arte y Cultura': '🎨 Arte es el puente entre la identidad andina y el STEAM. Danza, música y diseño son herramientas poderosas.',
+            'Educación Física': '🏃 Ed. Física puede ser el núcleo de proyectos sobre salud andina, biomecánica y bienestar comunitario.',
+            'Inglés': '🌐 Inglés conecta con proyectos de comunicación global, tecnología y acceso a información científica.',
+            'Educación para el Trabajo': '💼 Tu área conecta directamente con emprendimiento y proyectos de economía productiva local.',
+            'Educación Religiosa': '🕊️ Puedes liderar proyectos sobre valores, ética comunitaria e interculturalidad andina.',
+        };
+
+        const infoMetodologias = {
+            'ABP': 'ABP: Parte de una pregunta esencial y un producto final. Los estudiantes investigan y proponen soluciones reales.',
+            'ABR': 'ABR: Plantea un reto concreto. Conecta ciencia y tecnología con problemas reales de la comunidad.',
+            'Design Thinking': 'Design Thinking: Empatizar → Definir → Idear → Prototipar → Evaluar. Centrado en las personas.',
+            'STEAM integrado': 'STEAM: Integra Ciencia, Tecnología, Ingeniería, Arte y Matemática en un proyecto real.',
+            'Indagación científica 5E': 'Indagación 5E: Enganche → Exploración → Explicación → Elaboración → Evaluación.',
+            'Aprendizaje por descubrimiento': 'Por descubrimiento: El estudiante construye conocimiento explorando y cuestionando.',
+            'Estudio de casos': 'Casos: Análisis de situaciones reales para desarrollar pensamiento crítico.',
+            'Aprendizaje cooperativo': 'Cooperativo: Trabajo en equipo con roles definidos e interdependencia positiva.',
+            'Aula invertida': 'Flipped: Contenidos en casa, el aula para práctica y debate.',
+            'Tutoría entre pares': 'Tutoría: Estudiantes avanzados apoyan a sus compañeros.',
+            'Aprendizaje-Servicio': 'Servicio: Aprendizaje curricular combinado con servicio real a la comunidad andina.',
+            'Etnociencia': 'Etnociencia: Saberes andinos integrados con el currículo científico occidental.',
+            'Aprendizaje situado': 'Situado: El aprendizaje ocurre en contextos reales: chacra, río, feria, municipio.',
+        };
+
+        const alertasEquipo = {
+            solo: { primaria: '✅ En primaria integras varias áreas tú solo. Claude articulará las competencias.', secundaria: '💡 En secundaria trabajas tu área. Claude sugerirá cómo conectar con otros colegas.' },
+            'con-otro': { primaria: '👥 Dos docentes pueden diseñar un proyecto más rico.', secundaria: '👥 Coordinación entre 2 áreas — perfecto para ABP o Design Thinking.' },
+            equipo: { primaria: '🏫 Un equipo docente genera proyectos escolares transformadores.', secundaria: '🏫 Proyecto interdisciplinario — el modelo más potente para STEAM.' },
+        };
+
+        function updateGrados() {
+            const nivel = document.getElementById('ctx-nivel').value;
+            const gradoSelect = document.getElementById('ctx-grado');
+            gradoSelect.innerHTML = '<option value="">— Seleccionar —</option>';
+            const grados = nivel === 'Primaria' ? gradosPrimaria : nivel === 'Secundaria' ? gradosSecundaria : [];
+            grados.forEach(g => {
+                const opt = document.createElement('option');
+                opt.value = g; opt.textContent = g;
+                gradoSelect.appendChild(opt);
+            });
+            if (equipoSeleccionado) updateAlertaEquipo(equipoSeleccionado);
+        }
+
+        function selectEquipo(el, valor) {
+            equipoSeleccionado = valor;
+            document.getElementById('ctx-equipo').value = valor;
+            ['eq-solo','eq-con-otro','eq-equipo'].forEach(id => {
+                const btn = document.getElementById(id);
+                btn.style.borderColor = '#e5e7eb';
+                btn.style.background = '#fff';
+                btn.style.color = '#374151';
+            });
+            el.style.borderColor = '#059669';
+            el.style.background = '#f0fdf4';
+            el.style.color = '#059669';
+            updateAlertaEquipo(valor);
+        }
+
+        function updateAlertaEquipo(valor) {
+            const nivel = document.getElementById('ctx-nivel').value;
+            const div = document.getElementById('alerta-equipo');
+            const key = nivel === 'Secundaria' ? 'secundaria' : 'primaria';
+            const texto = alertasEquipo[valor]?.[key] || '';
+            if (texto) { div.textContent = texto; div.style.display = 'block'; }
+            else div.style.display = 'none';
+        }
+
+        function checkAreaDocente() {
+            const area = document.getElementById('ctx-area-docente').value;
+            const div = document.getElementById('info-area-docente');
+            if (area && fortalezasPorArea[area]) { div.textContent = fortalezasPorArea[area]; div.style.display = 'block'; }
+            else div.style.display = 'none';
+        }
+
+        function checkMetodologia() {
+            const met = document.getElementById('ctx-metodologia').value;
+            const div = document.getElementById('info-metodologia');
+            if (met && infoMetodologias[met]) { div.textContent = infoMetodologias[met]; div.style.display = 'block'; }
+            else div.style.display = 'none';
+        }
+
+        function getContextoPedagogico() {
+            const nivel      = document.getElementById('ctx-nivel').value;
+            const grado      = document.getElementById('ctx-grado').value;
+            const area       = document.getElementById('ctx-area-docente').value;
+            const equipo     = document.getElementById('ctx-equipo').value;
+            const met        = document.getElementById('ctx-metodologia').value;
+            let ctx = '';
+            if (nivel)  ctx += `Nivel: ${nivel}. `;
+            if (grado)  ctx += `Grado: ${grado}. `;
+            if (area)   ctx += `Área del docente: ${area}. `;
+            if (equipo === 'solo')     ctx += 'El docente trabaja solo. ';
+            if (equipo === 'con-otro') ctx += 'Coordina con otro docente (2 áreas). ';
+            if (equipo === 'equipo')   ctx += 'Proyecto con equipo docente interdisciplinario. ';
+            if (met)    ctx += `Metodología: ${met}. `;
+            if (!met)   ctx += 'Sugiere la metodología más apropiada. ';
+            if (ctx)    ctx += 'Sugiere qué áreas se articulan naturalmente. ';
+            return ctx;
+        }
+
+        // ===== MÓDULOS =====
+        function selectModulo(slug, name) {
+            currentModule = slug;
+            currentSessionId = null;
+            document.querySelectorAll('.doc-btn').forEach(b => b.classList.remove('active'));
+            const btn = document.getElementById('btn-' + slug);
+            if (btn) btn.classList.add('active');
+            document.getElementById('export-btn').style.display = 'none';
             document.getElementById('module-label').textContent = name;
+            document.getElementById('current-module-name').textContent = name;
+
+            const nivel     = document.getElementById('ctx-nivel').value;
+            const grado     = document.getElementById('ctx-grado').value;
+            const area      = document.getElementById('ctx-area-docente').value;
+            const equipo    = document.getElementById('ctx-equipo').value;
+            const met       = document.getElementById('ctx-metodologia').value;
+            const tieneContexto = nivel || area || equipo;
+
+            if (!tieneContexto) {
+                document.getElementById('messages').innerHTML = `
+                    <div class="welcome-msg">
+                        <p>Seleccionaste <em>${name}</em>.</p>
+                        <p style="margin-top:8px;">Configura tu contexto en la barra superior para una propuesta personalizada, o describe directamente la situación que quieres trabajar.</p>
+                    </div>`;
+            } else {
+                generarSugerencia(slug, name, nivel, grado, area, equipo, met);
+            }
             document.getElementById('user-input').focus();
         }
 
-        async function generarSugerencia(slug, name, nivel, grado, situacion, equipo, met) {
-            document.getElementById('module-label').textContent = name;
+        async function generarSugerencia(slug, name, nivel, grado, area, equipo, met) {
             document.getElementById('messages').innerHTML = '';
             showTyping();
 
-            // Construir prompt de sugerencia
-            let promptSugerencia = `Eres YachaPlanner, asistente pedagógico STEAM para docentes de Huancavelica, Perú.
+            const promptSugerencia = `Eres YachaPlanner, asistente pedagógico STEAM para docentes de Huancavelica, Perú.
 
-        Un docente acaba de configurar este contexto:
-        - Nivel: ${nivel || 'no especificado'}
-        - Grado: ${grado || 'no especificado'}
-        - Situación o problema a trabajar: ${situacion || 'no especificado'}
-        - Forma de trabajo: ${
-            equipo === 'solo' ? 'trabaja solo' :
-            equipo === 'con-otro' ? 'coordina con otro docente' :
-            equipo === 'equipo' ? 'proyecto con equipo docente interdisciplinario' :
-            'no especificado'
-        }
-        - Metodología preferida: ${met || 'no especificada — sugerir la más apropiada'}
-        - Documento que necesita: ${name}
+Un docente configuró este contexto:
+- Nivel: ${nivel || 'no especificado'}
+- Grado: ${grado || 'no especificado'}
+- Área del docente: ${area || 'no especificada'}
+- Forma de trabajo: ${equipo === 'solo' ? 'trabaja solo' : equipo === 'con-otro' ? 'coordina con otro docente' : equipo === 'equipo' ? 'equipo docente interdisciplinario' : 'no especificado'}
+- Metodología preferida: ${met || 'no especificada — sugiere la más apropiada'}
+- Documento que necesita: ${name}
 
-        En máximo 4 líneas:
-        1. Valida el contexto con entusiasmo y menciona el potencial pedagógico
-        2. Sugiere qué áreas curriculares se articulan naturalmente con esta situación
-        3. Si trabaja en equipo, menciona cómo coordinar con otros docentes
-        4. Pregunta una sola cosa para arrancar — algo concreto y específico
+En 3-4 líneas conversacionales:
+1. Valida el contexto con entusiasmo y menciona el potencial del área para hacer proyectos
+2. Sugiere qué situación o problema local de Huancavelica podría ser el punto de partida
+3. Si trabaja en equipo o con colega, sugiere qué otras áreas se articulan bien
+4. Termina con una pregunta concreta para arrancar
 
-        Responde en español, tono cálido y motivador. Sin markdown, sin listas, solo párrafo conversacional.`;
+Tono cálido, motivador, en español. Sin markdown ni listas — párrafo conversacional.`;
 
             try {
                 const res = await fetch('{{ route("chat.store") }}', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    },
-                    body: JSON.stringify({
-                        module: slug,
-                        message: promptSugerencia,
-                        session_id: null,
-                        _es_sugerencia: true,
-                    })
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                    body: JSON.stringify({ module: slug, message: promptSugerencia, session_id: null })
                 });
 
                 const reader = res.body.getReader();
                 const decoder = new TextDecoder();
-                let buffer = '';
-                let fullReply = '';
-                let botBubble = null;
-
+                let buffer = '', fullReply = '', botBubble = null;
                 removeTyping();
 
                 while (true) {
                     const { done, value } = await reader.read();
                     if (done) break;
-
                     buffer += decoder.decode(value, { stream: true });
                     const lines = buffer.split('\n');
                     buffer = lines.pop();
-
                     for (const line of lines) {
                         if (!line.startsWith('data: ')) continue;
                         const json = line.slice(6).trim();
                         if (!json) continue;
-
                         try {
                             const data = JSON.parse(json);
-
                             if (data.chunk !== undefined) {
                                 fullReply += data.chunk;
                                 if (!botBubble) {
@@ -377,7 +557,6 @@
                                 botBubble.innerHTML = marked.parse(fullReply);
                                 document.getElementById('messages').scrollTop = 99999;
                             }
-
                             if (data.done) {
                                 currentSessionId = data.session_id;
                                 document.getElementById('credits-count').textContent = data.credits_remaining;
@@ -387,21 +566,18 @@
                         } catch(e) {}
                     }
                 }
-
             } catch(e) {
                 removeTyping();
-                document.getElementById('messages').innerHTML =
-                    '<div class="welcome-msg"><p>Escribe tu solicitud para comenzar.</p></div>';
+                document.getElementById('messages').innerHTML = '<div class="welcome-msg"><p>Describe la situación que quieres trabajar.</p></div>';
             }
-
             document.getElementById('user-input').focus();
         }
 
+        // ===== CHAT =====
         function newChat() {
             currentSessionId = null;
             document.getElementById('export-btn').style.display = 'none';
-            document.getElementById('messages').innerHTML =
-                '<div class="welcome-msg"><p>Nueva sesión iniciada.<br>Escribe tu solicitud.</p></div>';
+            document.getElementById('messages').innerHTML = '<div class="welcome-msg"><p>Nueva sesión. Describe la situación que quieres trabajar.</p></div>';
         }
 
         function loadSession(id, mod) {
@@ -425,8 +601,7 @@
                 wrap.innerHTML = `<div class="bubble-user">${content.replace(/\n/g,'<br>')}</div>`;
             } else {
                 wrap.className = 'msg-bot';
-                const html = marked.parse(content);
-                wrap.innerHTML = `<div class="bot-avatar">🌱</div><div class="bubble-bot">${html}</div>`;
+                wrap.innerHTML = `<div class="bot-avatar">🌱</div><div class="bubble-bot">${marked.parse(content)}</div>`;
             }
             msgs.appendChild(wrap);
             msgs.scrollTop = msgs.scrollHeight;
@@ -445,10 +620,7 @@
         function removeTyping() { document.getElementById('typing')?.remove(); }
 
         function exportWord() {
-            if (!currentSessionId) {
-                alert('Primero genera una respuesta para exportar.');
-                return;
-            }
+            if (!currentSessionId) { alert('Primero genera una respuesta para exportar.'); return; }
             window.open(`/export/word/${currentSessionId}`, '_blank');
         }
 
@@ -456,7 +628,7 @@
             const input = document.getElementById('user-input');
             const text = input.value.trim();
             if (!text) return;
-            if (!currentModule) { alert('Selecciona un módulo primero'); return; }
+            if (!currentModule) { alert('Selecciona un documento primero'); return; }
             input.value = '';
             input.style.height = 'auto';
             document.getElementById('send-btn').disabled = true;
@@ -466,10 +638,7 @@
             try {
                 const res = await fetch('{{ route("chat.store") }}', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    },
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
                     body: JSON.stringify({
                         module: currentModule,
                         message: getContextoPedagogico() + text,
@@ -487,28 +656,21 @@
 
                 const reader = res.body.getReader();
                 const decoder = new TextDecoder();
-                let buffer = '';
-                let fullReply = '';
-                let botBubble = null;
-
+                let buffer = '', fullReply = '', botBubble = null;
                 removeTyping();
 
                 while (true) {
                     const { done, value } = await reader.read();
                     if (done) break;
-
                     buffer += decoder.decode(value, { stream: true });
                     const lines = buffer.split('\n');
                     buffer = lines.pop();
-
                     for (const line of lines) {
                         if (!line.startsWith('data: ')) continue;
                         const json = line.slice(6).trim();
                         if (!json) continue;
-
                         try {
                             const data = JSON.parse(json);
-
                             if (data.chunk !== undefined) {
                                 fullReply += data.chunk;
                                 if (!botBubble) {
@@ -523,7 +685,6 @@
                                 botBubble.innerHTML = marked.parse(fullReply);
                                 document.getElementById('messages').scrollTop = 99999;
                             }
-
                             if (data.done) {
                                 currentSessionId = data.session_id;
                                 document.getElementById('credits-count').textContent = data.credits_remaining;
@@ -533,12 +694,10 @@
                         } catch(e) {}
                     }
                 }
-
             } catch(e) {
                 removeTyping();
                 addMessage('assistant', '❌ Error de conexión. Intenta de nuevo.');
             }
-
             document.getElementById('send-btn').disabled = false;
             input.focus();
         }
@@ -547,139 +706,5 @@
             this.style.height = 'auto';
             this.style.height = Math.min(this.scrollHeight, 120) + 'px';
         });
-    
-        // ===== CONTEXTO PEDAGÓGICO =====
-
-            const gradosPrimaria = [
-                '1° de Primaria','2° de Primaria','3° de Primaria',
-                '4° de Primaria','5° de Primaria','6° de Primaria'
-            ];
-
-            const gradosSecundaria = [
-                '1° de Secundaria','2° de Secundaria','3° de Secundaria',
-                '4° de Secundaria','5° de Secundaria'
-            ];
-
-            const infoMetodologias = {
-                'ABP': '📘 Parte de una pregunta esencial y un producto final. Los estudiantes investigan y proponen soluciones reales a problemas de su entorno.',
-                'ABR': '📘 Plantea un reto concreto a resolver. Conecta ciencia y tecnología con problemas reales de la comunidad andina.',
-                'Design Thinking': '📘 5 fases: Empatizar → Definir → Idear → Prototipar → Evaluar. Centrado en las personas y sus necesidades.',
-                'STEAM integrado': '📘 Integra Ciencia, Tecnología, Ingeniería, Arte y Matemática en torno a un proyecto o situación real.',
-                'Indagación científica 5E': '📘 Ciclo: Enganche → Exploración → Explicación → Elaboración → Evaluación. Ideal para desarrollar pensamiento científico.',
-                'Aprendizaje por descubrimiento': '📘 El estudiante construye su conocimiento explorando activamente, cuestionando y experimentando.',
-                'Estudio de casos': '📘 Análisis profundo de situaciones reales o simuladas para desarrollar pensamiento crítico y toma de decisiones.',
-                'Aprendizaje cooperativo': '📘 Trabajo en equipo con roles definidos, interdependencia positiva y responsabilidad compartida.',
-                'Aula invertida': '📘 El estudiante revisa contenidos en casa y el aula se usa para práctica, debate y resolución de problemas.',
-                'Tutoría entre pares': '📘 Estudiantes más avanzados apoyan a sus compañeros, reforzando el aprendizaje de ambos.',
-                'Aprendizaje-Servicio': '📘 Combina aprendizaje curricular con servicio real a la comunidad. Muy potente en contextos rurales andinos.',
-                'Etnociencia': '📘 Integra saberes andinos (medicina, astronomía, agricultura quechua) con el currículo científico occidental.',
-                'Aprendizaje situado en la comunidad': '📘 El aprendizaje ocurre en contextos reales: chacra, río, feria, municipio, mercado local.'
-            };
-
-            const alertasEquipo = {
-                'solo': {
-                    primaria: '✅ En primaria puedes integrar varias áreas tú solo. Claude te sugerirá cómo articular las competencias en un solo proyecto.',
-                    secundaria: '💡 En secundaria cada área tiene un docente distinto. Si trabajas solo, Claude diseñará para tu área pero sugerirá cómo conectar con otros colegas.'
-                },
-                'con-otro': {
-                    primaria: '👥 Excelente. Dos docentes pueden diseñar un proyecto más rico. Claude articulará las competencias de ambas áreas.',
-                    secundaria: '👥 Coordinación entre dos áreas — una forma poderosa de hacer ABP o Design Thinking. Claude diseñará el proyecto para ambos.'
-                },
-                'equipo': {
-                    primaria: '🏫 Un equipo docente en primaria puede generar un proyecto escolar transformador. Claude diseñará con visión integral.',
-                    secundaria: '🏫 Proyecto interdisciplinario con varios docentes — el modelo más potente para STEAM. Claude coordinará todas las áreas en un proyecto cohesionado.'
-                }
-            };
-
-            let equipoSeleccionado = '';
-
-            function updateGrados() {
-                const nivel = document.getElementById('ctx-nivel').value;
-                const gradoSelect = document.getElementById('ctx-grado');
-                gradoSelect.innerHTML = '<option value="">— Seleccionar —</option>';
-
-                const grados = nivel === 'Primaria' ? gradosPrimaria :
-                            nivel === 'Secundaria' ? gradosSecundaria : [];
-
-                grados.forEach(g => {
-                    const opt = document.createElement('option');
-                    opt.value = g;
-                    opt.textContent = g;
-                    gradoSelect.appendChild(opt);
-                });
-
-                // Actualizar alerta de equipo si ya hay uno seleccionado
-                if (equipoSeleccionado) updateAlertaEquipo(equipoSeleccionado);
-            }
-
-            function selectEquipo(el, valor) {
-                equipoSeleccionado = valor;
-                document.getElementById('ctx-equipo').value = valor;
-
-                // Resaltar seleccionado
-                document.querySelectorAll('#ctx-equipo-options label').forEach(l => {
-                    l.style.borderColor = '#e5e7eb';
-                    l.style.background = '#fff';
-                });
-                el.style.borderColor = '#059669';
-                el.style.background = '#f0fdf4';
-
-                updateAlertaEquipo(valor);
-            }
-
-            function updateAlertaEquipo(valor) {
-                const nivel = document.getElementById('ctx-nivel').value;
-                const alertaDiv = document.getElementById('alerta-equipo');
-                const alertaTexto = document.getElementById('alerta-equipo-texto');
-
-                if (!valor) { alertaDiv.style.display = 'none'; return; }
-
-                const key = nivel === 'Secundaria' ? 'secundaria' : 'primaria';
-                const texto = alertasEquipo[valor]?.[key] || '';
-
-                if (texto) {
-                    alertaTexto.textContent = texto;
-                    alertaDiv.style.display = 'block';
-                }
-            }
-
-            function checkMetodologia() {
-                const met = document.getElementById('ctx-metodologia').value;
-                const infoDiv = document.getElementById('info-metodologia');
-                const infoTexto = document.getElementById('info-texto');
-
-                if (met && infoMetodologias[met]) {
-                    infoTexto.textContent = infoMetodologias[met];
-                    infoDiv.style.display = 'block';
-                } else {
-                    infoDiv.style.display = 'none';
-                }
-            }
-
-            function getContextoPedagogico() {
-                const nivel     = document.getElementById('ctx-nivel').value;
-                const grado     = document.getElementById('ctx-grado').value;
-                const situacion = document.getElementById('ctx-situacion').value.trim();
-                const equipo    = document.getElementById('ctx-equipo').value;
-                const met       = document.getElementById('ctx-metodologia').value;
-
-                let ctx = '';
-
-                if (nivel)     ctx += `Nivel educativo: ${nivel}. `;
-                if (grado)     ctx += `Grado: ${grado}. `;
-                if (situacion) ctx += `Situación o problema a trabajar: "${situacion}". `;
-                if (equipo === 'solo')      ctx += 'El docente trabaja solo. ';
-                if (equipo === 'con-otro')  ctx += 'El docente coordina con otro colega (2 áreas). ';
-                if (equipo === 'equipo')    ctx += 'Es un proyecto de equipo docente interdisciplinario. ';
-                if (met)       ctx += `Metodología preferida: ${met}. `;
-                if (!met)      ctx += 'Sugiere la metodología más apropiada para esta situación. ';
-
-                if (ctx) ctx += 'Sugiere qué áreas curriculares se articulan naturalmente con esta situación. ';
-
-                return ctx;
-            }
-
-
-
     </script>
 </x-app-layout>
