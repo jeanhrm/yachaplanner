@@ -88,11 +88,11 @@
 
             {{-- Contexto pedagógico --}}
             <div class="yp-card" style="display:flex;flex-direction:column;gap:10px;">
-                <div class="yp-card-title">Contexto pedagógico</div>
+                <div class="yp-card-title">¿Cómo quieres trabajar?</div>
 
                 {{-- Nivel --}}
                 <div>
-                    <label style="font-size:11px;font-weight:600;color:#6b7280;display:block;margin-bottom:4px;">Nivel</label>
+                    <label style="font-size:11px;font-weight:600;color:#6b7280;display:block;margin-bottom:4px;">Nivel educativo</label>
                     <select id="ctx-nivel" onchange="updateGrados()" style="width:100%;border:1px solid #e5e7eb;border-radius:6px;padding:6px 8px;font-size:13px;color:#374151;background:#fff;">
                         <option value="">— Seleccionar —</option>
                         <option value="Primaria">Primaria</option>
@@ -104,34 +104,46 @@
                 <div>
                     <label style="font-size:11px;font-weight:600;color:#6b7280;display:block;margin-bottom:4px;">Grado</label>
                     <select id="ctx-grado" style="width:100%;border:1px solid #e5e7eb;border-radius:6px;padding:6px 8px;font-size:13px;color:#374151;background:#fff;">
-                        <option value="">— Primero nivel —</option>
+                        <option value="">— Primero el nivel —</option>
                     </select>
                 </div>
 
-                {{-- Área --}}
+                {{-- Situación o problema --}}
                 <div>
-                    <label style="font-size:11px;font-weight:600;color:#6b7280;display:block;margin-bottom:4px;">Área curricular</label>
-                    <select id="ctx-area" style="width:100%;border:1px solid #e5e7eb;border-radius:6px;padding:6px 8px;font-size:13px;color:#374151;background:#fff;">
-                        <option value="">— Seleccionar —</option>
-                        <option>Matemática</option>
-                        <option>Comunicación</option>
-                        <option>Ciencia y Tecnología</option>
-                        <option>Personal Social</option>
-                        <option>Arte y Cultura</option>
-                        <option>Educación Física</option>
-                        <option>Inglés</option>
-                        <option>Educación Religiosa</option>
-                        <option>Desarrollo Personal, Ciudadanía y Cívica</option>
-                        <option>Historia, Geografía y Economía</option>
-                        <option>Educación para el Trabajo</option>
-                    </select>
+                    <label style="font-size:11px;font-weight:600;color:#6b7280;display:block;margin-bottom:4px;">
+                        ¿Qué situación o problema quieres trabajar?
+                    </label>
+                    <textarea id="ctx-situacion" rows="2"
+                        placeholder="Ej: contaminación del río Ichu, heladas, feria de la papa..."
+                        style="width:100%;border:1px solid #e5e7eb;border-radius:6px;padding:6px 8px;font-size:12px;color:#374151;resize:none;font-family:inherit;line-height:1.5;"></textarea>
+                    <div style="font-size:11px;color:#9ca3af;margin-top:3px;">Claude sugerirá qué áreas se articulan naturalmente.</div>
+                </div>
+
+                {{-- ¿Con quién trabajas? --}}
+                <div>
+                    <label style="font-size:11px;font-weight:600;color:#6b7280;display:block;margin-bottom:6px;">¿Con quién trabajas?</label>
+                    <div style="display:flex;flex-direction:column;gap:6px;" id="ctx-equipo-options">
+                        <label style="display:flex;align-items:flex-start;gap:8px;cursor:pointer;padding:8px;border:1px solid #e5e7eb;border-radius:8px;font-size:12px;color:#374151;transition:all 0.15s;" onclick="selectEquipo(this, 'solo')">
+                            <span style="margin-top:1px;">👤</span>
+                            <span><strong>Solo</strong><br><span style="color:#9ca3af;">Soy el único docente de este grupo</span></span>
+                        </label>
+                        <label style="display:flex;align-items:flex-start;gap:8px;cursor:pointer;padding:8px;border:1px solid #e5e7eb;border-radius:8px;font-size:12px;color:#374151;transition:all 0.15s;" onclick="selectEquipo(this, 'con-otro')">
+                            <span style="margin-top:1px;">👥</span>
+                            <span><strong>Con otro docente</strong><br><span style="color:#9ca3af;">Coordinamos entre 2 áreas</span></span>
+                        </label>
+                        <label style="display:flex;align-items:flex-start;gap:8px;cursor:pointer;padding:8px;border:1px solid #e5e7eb;border-radius:8px;font-size:12px;color:#374151;transition:all 0.15s;" onclick="selectEquipo(this, 'equipo')">
+                            <span style="margin-top:1px;">🏫</span>
+                            <span><strong>Equipo docente</strong><br><span style="color:#9ca3af;">Proyecto interdisciplinario con varios colegas</span></span>
+                        </label>
+                    </div>
+                    <input type="hidden" id="ctx-equipo" value="">
                 </div>
 
                 {{-- Metodología --}}
                 <div>
-                    <label style="font-size:11px;font-weight:600;color:#6b7280;display:block;margin-bottom:4px;">Metodología activa</label>
+                    <label style="font-size:11px;font-weight:600;color:#6b7280;display:block;margin-bottom:4px;">Metodología (opcional)</label>
                     <select id="ctx-metodologia" onchange="checkMetodologia()" style="width:100%;border:1px solid #e5e7eb;border-radius:6px;padding:6px 8px;font-size:13px;color:#374151;background:#fff;">
-                        <option value="">— Seleccionar —</option>
+                        <option value="">— Dejar que Claude sugiera —</option>
                         <optgroup label="Proyectos">
                             <option value="ABP">ABP — Aprendizaje Basado en Proyectos</option>
                             <option value="ABR">ABR — Aprendizaje Basado en Retos</option>
@@ -156,18 +168,19 @@
                     </select>
                 </div>
 
-                {{-- Alerta interdisciplinaria --}}
-                <div id="alerta-interdisciplinar" style="display:none;background:#f0fdf4;border:1px solid #a7f3d0;border-radius:8px;padding:10px;font-size:12px;color:#065f46;line-height:1.5;">
-                    <strong>💡 Metodología interdisciplinaria</strong><br>
-                    <span id="alerta-texto"></span>
-                </div>
-
                 {{-- Info metodología --}}
                 <div id="info-metodologia" style="display:none;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:10px;font-size:12px;color:#92400e;line-height:1.5;">
                     <span id="info-texto"></span>
                 </div>
 
+                {{-- Alerta equipo --}}
+                <div id="alerta-equipo" style="display:none;background:#f0fdf4;border:1px solid #a7f3d0;border-radius:8px;padding:10px;font-size:12px;color:#065f46;line-height:1.5;">
+                    <span id="alerta-equipo-texto"></span>
+                </div>
+
             </div>
+
+
 
             {{-- Recientes --}}
             @if($sessions->count())
@@ -397,121 +410,136 @@
             this.style.height = Math.min(this.scrollHeight, 120) + 'px';
         });
     
-            // ===== CONTEXTO PEDAGÓGICO =====
+        // ===== CONTEXTO PEDAGÓGICO =====
 
-        const gradosPrimaria = [
-            '1° de Primaria','2° de Primaria','3° de Primaria',
-            '4° de Primaria','5° de Primaria','6° de Primaria'
-        ];
-
-        const gradosSecundaria = [
-            '1° de Secundaria','2° de Secundaria','3° de Secundaria',
-            '4° de Secundaria','5° de Secundaria'
-        ];
-
-        const metodologiasInterdisciplinarias = [
-            'ABP','ABR','Design Thinking','STEAM integrado',
-            'Aprendizaje-Servicio','Etnociencia','Aprendizaje situado en la comunidad'
-        ];
-
-        const infoMetodologias = {
-            'ABP': 'El ABP parte de una pregunta esencial y un producto final. Los estudiantes investigan, colaboran y presentan soluciones reales.',
-            'ABR': 'El ABR plantea un reto concreto a resolver. Ideal para conectar ciencia y tecnología con problemas de la comunidad.',
-            'Design Thinking': 'Metodología centrada en el usuario con 5 fases: Empatizar, Definir, Idear, Prototipar y Evaluar.',
-            'STEAM integrado': 'Integra Ciencia, Tecnología, Ingeniería, Arte y Matemática en torno a un proyecto común.',
-            'Indagación científica 5E': 'Ciclo de 5 fases: Enganche, Exploración, Explicación, Elaboración y Evaluación. Ideal para Ciencia y Tecnología.',
-            'Aprendizaje por descubrimiento': 'El estudiante construye su conocimiento a través de la exploración activa y el cuestionamiento.',
-            'Estudio de casos': 'Análisis profundo de situaciones reales o simuladas para desarrollar pensamiento crítico.',
-            'Aprendizaje cooperativo': 'Trabajo en equipo con roles definidos, interdependencia positiva y responsabilidad individual.',
-            'Aula invertida': 'El estudiante revisa contenidos en casa y el aula se usa para práctica, debate y proyectos.',
-            'Tutoría entre pares': 'Estudiantes más avanzados apoyan a sus compañeros, reforzando el aprendizaje de ambos.',
-            'Aprendizaje-Servicio': 'Combina aprendizaje curricular con servicio a la comunidad. Muy potente en contextos rurales andinos.',
-            'Etnociencia': 'Integra saberes andinos (medicina, astronomía, agricultura quechua) con el currículo científico occidental.',
-            'Aprendizaje situado en la comunidad': 'El aprendizaje ocurre en contextos reales de la comunidad: chacra, río, feria, municipio.'
-        };
-
-        const alertasInterdisciplinares = {
-            'ABP': 'Esta metodología funciona mejor articulando 2 o más áreas. En secundaria, coordina con docentes de otras áreas para un proyecto integrador.',
-            'ABR': 'El reto puede involucrar Ciencia, Matemática y Comunicación. Considera trabajar con otro docente para mayor impacto.',
-            'Design Thinking': 'Design Thinking se potencia al cruzar Arte, Ciencia y Comunicación. Ideal para trabajo interdocente en secundaria.',
-            'STEAM integrado': 'STEAM requiere coordinar al menos 3 áreas. En primaria lo puede hacer un solo docente; en secundaria involucra a varios.',
-            'Aprendizaje-Servicio': 'Este enfoque conecta varias áreas con la comunidad. Coordina con Personal Social, Comunicación y el área técnica.',
-            'Etnociencia': 'La etnociencia articula Ciencia y Tecnología con Comunicación (quechua) y Personal Social. Involucra a la comunidad.',
-            'Aprendizaje situado en la comunidad': 'El aprendizaje situado puede cruzar múltiples áreas según el contexto elegido. Coordina con otros docentes.'
-        };
-
-        function updateGrados() {
-            const nivel = document.getElementById('ctx-nivel').value;
-            const gradoSelect = document.getElementById('ctx-grado');
-            gradoSelect.innerHTML = '<option value="">— Seleccionar —</option>';
-
-            const grados = nivel === 'Primaria' ? gradosPrimaria :
-                        nivel === 'Secundaria' ? gradosSecundaria : [];
-
-            grados.forEach(g => {
-                const opt = document.createElement('option');
-                opt.value = g;
-                opt.textContent = g;
-                gradoSelect.appendChild(opt);
-            });
-
-            // Filtrar áreas según nivel
-            const areaSelect = document.getElementById('ctx-area');
-            const areasSecundaria = [
-                'Desarrollo Personal, Ciudadanía y Cívica',
-                'Historia, Geografía y Economía',
-                'Educación para el Trabajo',
-                'Inglés'
+            const gradosPrimaria = [
+                '1° de Primaria','2° de Primaria','3° de Primaria',
+                '4° de Primaria','5° de Primaria','6° de Primaria'
             ];
-            Array.from(areaSelect.options).forEach(opt => {
-                if (areasSecundaria.includes(opt.value)) {
-                    opt.style.display = nivel === 'Secundaria' ? '' : 'none';
+
+            const gradosSecundaria = [
+                '1° de Secundaria','2° de Secundaria','3° de Secundaria',
+                '4° de Secundaria','5° de Secundaria'
+            ];
+
+            const infoMetodologias = {
+                'ABP': '📘 Parte de una pregunta esencial y un producto final. Los estudiantes investigan y proponen soluciones reales a problemas de su entorno.',
+                'ABR': '📘 Plantea un reto concreto a resolver. Conecta ciencia y tecnología con problemas reales de la comunidad andina.',
+                'Design Thinking': '📘 5 fases: Empatizar → Definir → Idear → Prototipar → Evaluar. Centrado en las personas y sus necesidades.',
+                'STEAM integrado': '📘 Integra Ciencia, Tecnología, Ingeniería, Arte y Matemática en torno a un proyecto o situación real.',
+                'Indagación científica 5E': '📘 Ciclo: Enganche → Exploración → Explicación → Elaboración → Evaluación. Ideal para desarrollar pensamiento científico.',
+                'Aprendizaje por descubrimiento': '📘 El estudiante construye su conocimiento explorando activamente, cuestionando y experimentando.',
+                'Estudio de casos': '📘 Análisis profundo de situaciones reales o simuladas para desarrollar pensamiento crítico y toma de decisiones.',
+                'Aprendizaje cooperativo': '📘 Trabajo en equipo con roles definidos, interdependencia positiva y responsabilidad compartida.',
+                'Aula invertida': '📘 El estudiante revisa contenidos en casa y el aula se usa para práctica, debate y resolución de problemas.',
+                'Tutoría entre pares': '📘 Estudiantes más avanzados apoyan a sus compañeros, reforzando el aprendizaje de ambos.',
+                'Aprendizaje-Servicio': '📘 Combina aprendizaje curricular con servicio real a la comunidad. Muy potente en contextos rurales andinos.',
+                'Etnociencia': '📘 Integra saberes andinos (medicina, astronomía, agricultura quechua) con el currículo científico occidental.',
+                'Aprendizaje situado en la comunidad': '📘 El aprendizaje ocurre en contextos reales: chacra, río, feria, municipio, mercado local.'
+            };
+
+            const alertasEquipo = {
+                'solo': {
+                    primaria: '✅ En primaria puedes integrar varias áreas tú solo. Claude te sugerirá cómo articular las competencias en un solo proyecto.',
+                    secundaria: '💡 En secundaria cada área tiene un docente distinto. Si trabajas solo, Claude diseñará para tu área pero sugerirá cómo conectar con otros colegas.'
+                },
+                'con-otro': {
+                    primaria: '👥 Excelente. Dos docentes pueden diseñar un proyecto más rico. Claude articulará las competencias de ambas áreas.',
+                    secundaria: '👥 Coordinación entre dos áreas — una forma poderosa de hacer ABP o Design Thinking. Claude diseñará el proyecto para ambos.'
+                },
+                'equipo': {
+                    primaria: '🏫 Un equipo docente en primaria puede generar un proyecto escolar transformador. Claude diseñará con visión integral.',
+                    secundaria: '🏫 Proyecto interdisciplinario con varios docentes — el modelo más potente para STEAM. Claude coordinará todas las áreas en un proyecto cohesionado.'
                 }
-            });
-        }
+            };
 
-        function checkMetodologia() {
-            const met = document.getElementById('ctx-metodologia').value;
-            const nivel = document.getElementById('ctx-nivel').value;
-            const alertaDiv = document.getElementById('alerta-interdisciplinar');
-            const alertaTexto = document.getElementById('alerta-texto');
-            const infoDiv = document.getElementById('info-metodologia');
-            const infoTexto = document.getElementById('info-texto');
+            let equipoSeleccionado = '';
 
-            // Info de la metodología
-            if (met && infoMetodologias[met]) {
-                infoTexto.textContent = '📘 ' + infoMetodologias[met];
-                infoDiv.style.display = 'block';
-            } else {
-                infoDiv.style.display = 'none';
+            function updateGrados() {
+                const nivel = document.getElementById('ctx-nivel').value;
+                const gradoSelect = document.getElementById('ctx-grado');
+                gradoSelect.innerHTML = '<option value="">— Seleccionar —</option>';
+
+                const grados = nivel === 'Primaria' ? gradosPrimaria :
+                            nivel === 'Secundaria' ? gradosSecundaria : [];
+
+                grados.forEach(g => {
+                    const opt = document.createElement('option');
+                    opt.value = g;
+                    opt.textContent = g;
+                    gradoSelect.appendChild(opt);
+                });
+
+                // Actualizar alerta de equipo si ya hay uno seleccionado
+                if (equipoSeleccionado) updateAlertaEquipo(equipoSeleccionado);
             }
 
-            // Alerta interdisciplinaria
-            if (met && metodologiasInterdisciplinarias.includes(met)) {
-                let texto = alertasInterdisciplinares[met] || '';
-                if (nivel === 'Secundaria') {
-                    texto += ' En secundaria cada área tiene un docente distinto — la coordinación es clave.';
-                }
-                alertaTexto.textContent = texto;
-                alertaDiv.style.display = 'block';
-            } else {
-                alertaDiv.style.display = 'none';
+            function selectEquipo(el, valor) {
+                equipoSeleccionado = valor;
+                document.getElementById('ctx-equipo').value = valor;
+
+                // Resaltar seleccionado
+                document.querySelectorAll('#ctx-equipo-options label').forEach(l => {
+                    l.style.borderColor = '#e5e7eb';
+                    l.style.background = '#fff';
+                });
+                el.style.borderColor = '#059669';
+                el.style.background = '#f0fdf4';
+
+                updateAlertaEquipo(valor);
             }
-        }
 
-        function getContextoPedagogico() {
-            const nivel = document.getElementById('ctx-nivel').value;
-            const grado = document.getElementById('ctx-grado').value;
-            const area  = document.getElementById('ctx-area').value;
-            const met   = document.getElementById('ctx-metodologia').value;
+            function updateAlertaEquipo(valor) {
+                const nivel = document.getElementById('ctx-nivel').value;
+                const alertaDiv = document.getElementById('alerta-equipo');
+                const alertaTexto = document.getElementById('alerta-equipo-texto');
 
-            let ctx = '';
-            if (nivel)  ctx += `Nivel: ${nivel}. `;
-            if (grado)  ctx += `Grado: ${grado}. `;
-            if (area)   ctx += `Área: ${area}. `;
-            if (met)    ctx += `Metodología: ${met}. `;
-            return ctx;
-        }
+                if (!valor) { alertaDiv.style.display = 'none'; return; }
+
+                const key = nivel === 'Secundaria' ? 'secundaria' : 'primaria';
+                const texto = alertasEquipo[valor]?.[key] || '';
+
+                if (texto) {
+                    alertaTexto.textContent = texto;
+                    alertaDiv.style.display = 'block';
+                }
+            }
+
+            function checkMetodologia() {
+                const met = document.getElementById('ctx-metodologia').value;
+                const infoDiv = document.getElementById('info-metodologia');
+                const infoTexto = document.getElementById('info-texto');
+
+                if (met && infoMetodologias[met]) {
+                    infoTexto.textContent = infoMetodologias[met];
+                    infoDiv.style.display = 'block';
+                } else {
+                    infoDiv.style.display = 'none';
+                }
+            }
+
+            function getContextoPedagogico() {
+                const nivel     = document.getElementById('ctx-nivel').value;
+                const grado     = document.getElementById('ctx-grado').value;
+                const situacion = document.getElementById('ctx-situacion').value.trim();
+                const equipo    = document.getElementById('ctx-equipo').value;
+                const met       = document.getElementById('ctx-metodologia').value;
+
+                let ctx = '';
+
+                if (nivel)     ctx += `Nivel educativo: ${nivel}. `;
+                if (grado)     ctx += `Grado: ${grado}. `;
+                if (situacion) ctx += `Situación o problema a trabajar: "${situacion}". `;
+                if (equipo === 'solo')      ctx += 'El docente trabaja solo. ';
+                if (equipo === 'con-otro')  ctx += 'El docente coordina con otro colega (2 áreas). ';
+                if (equipo === 'equipo')    ctx += 'Es un proyecto de equipo docente interdisciplinario. ';
+                if (met)       ctx += `Metodología preferida: ${met}. `;
+                if (!met)      ctx += 'Sugiere la metodología más apropiada para esta situación. ';
+
+                if (ctx) ctx += 'Sugiere qué áreas curriculares se articulan naturalmente con esta situación. ';
+
+                return ctx;
+            }
 
 
 
