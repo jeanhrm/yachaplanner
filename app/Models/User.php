@@ -93,11 +93,15 @@ class User extends Authenticatable
 
     public function hasCredits(): bool
     {
-        return $this->weekly_credits_used < $this->weekly_credits_limit;
+        return $this->remainingCredits() > 0;
     }
 
     public function remainingCredits(): int
     {
-        return max(0, $this->weekly_credits_limit - $this->weekly_credits_used);
+        $limit = match($this->plan ?? 'free') {
+        'pro', 'institution' => 999,
+        default => 5,
+        };
+        return max(0, $limit - $this->weekly_credits_used);
     }
 }

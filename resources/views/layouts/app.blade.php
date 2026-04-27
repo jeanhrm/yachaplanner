@@ -246,8 +246,13 @@
                 ✍️ Planificador
             </a>
             <a href="{{ route('credits.index') }}" class="yp-nav-link {{ request()->routeIs('credits.*') ? 'active' : '' }}">
-                ⚡ Créditos
+                ⚡ Más Créditos
             </a>
+            @if(in_array(auth()->user()->email, ['jean@quipubit.com','ventas@quipubit.com']))
+            <a href="{{ route('admin.index') }}" class="yp-nav-link {{ request()->routeIs('admin.*') ? 'active' : '' }}">
+                🛡️ Admin
+            </a>
+            @endif
             <div class="yp-nav-divider"></div>
 
             {{-- Usuario --}}

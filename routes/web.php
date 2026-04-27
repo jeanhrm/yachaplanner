@@ -5,6 +5,7 @@ use App\Http\Controllers\ChatController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\CreditsController;
+use App\Http\Controllers\AdminController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -24,6 +25,12 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/export/word/{session}', [ExportController::class, 'word'])->name('export.word');
     Route::get('/creditos', [CreditsController::class, 'index'])->name('credits.index');
+});
+
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/',                           [AdminController::class, 'index'])->name('index');
+    Route::post('/users/{user}/plan',         [AdminController::class, 'updatePlan'])->name('updatePlan');
+    Route::post('/users/{user}/credits',      [AdminController::class, 'addCredits'])->name('addCredits');
 });
 
 require __DIR__.'/auth.php';
