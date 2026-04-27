@@ -353,16 +353,49 @@
 
             <div class="form-grid">
                 <div class="form-group">
+                    <label class="form-label" for="region">Región</label>
+                    <select id="region" name="region" class="form-input" onchange="updateUgeles()">
+                        <option value="">— Seleccionar —</option>
+                        <optgroup label="Sierra Sur">
+                            <option value="Huancavelica"  {{ old('region')=='Huancavelica'  ?'selected':'' }}>Huancavelica</option>
+                            <option value="Ayacucho"      {{ old('region')=='Ayacucho'      ?'selected':'' }}>Ayacucho</option>
+                            <option value="Apurímac"      {{ old('region')=='Apurímac'      ?'selected':'' }}>Apurímac</option>
+                            <option value="Cusco"         {{ old('region')=='Cusco'         ?'selected':'' }}>Cusco</option>
+                            <option value="Puno"          {{ old('region')=='Puno'          ?'selected':'' }}>Puno</option>
+                        </optgroup>
+                        <optgroup label="Sierra Centro">
+                            <option value="Junín"         {{ old('region')=='Junín'         ?'selected':'' }}>Junín</option>
+                            <option value="Pasco"         {{ old('region')=='Pasco'         ?'selected':'' }}>Pasco</option>
+                            <option value="Huánuco"       {{ old('region')=='Huánuco'       ?'selected':'' }}>Huánuco</option>
+                            <option value="Áncash"        {{ old('region')=='Áncash'        ?'selected':'' }}>Áncash</option>
+                        </optgroup>
+                        <optgroup label="Costa">
+                            <option value="Lima"          {{ old('region')=='Lima'          ?'selected':'' }}>Lima</option>
+                            <option value="Lima Provincias" {{ old('region')=='Lima Provincias' ?'selected':'' }}>Lima Provincias</option>
+                            <option value="Callao"        {{ old('region')=='Callao'        ?'selected':'' }}>Callao</option>
+                            <option value="Ica"           {{ old('region')=='Ica'           ?'selected':'' }}>Ica</option>
+                            <option value="Arequipa"      {{ old('region')=='Arequipa'      ?'selected':'' }}>Arequipa</option>
+                            <option value="Moquegua"      {{ old('region')=='Moquegua'      ?'selected':'' }}>Moquegua</option>
+                            <option value="Tacna"         {{ old('region')=='Tacna'         ?'selected':'' }}>Tacna</option>
+                            <option value="La Libertad"   {{ old('region')=='La Libertad'   ?'selected':'' }}>La Libertad</option>
+                            <option value="Lambayeque"    {{ old('region')=='Lambayeque'    ?'selected':'' }}>Lambayeque</option>
+                            <option value="Piura"         {{ old('region')=='Piura'         ?'selected':'' }}>Piura</option>
+                            <option value="Tumbes"        {{ old('region')=='Tumbes'        ?'selected':'' }}>Tumbes</option>
+                        </optgroup>
+                        <optgroup label="Selva">
+                            <option value="Loreto"        {{ old('region')=='Loreto'        ?'selected':'' }}>Loreto</option>
+                            <option value="Ucayali"       {{ old('region')=='Ucayali'       ?'selected':'' }}>Ucayali</option>
+                            <option value="San Martín"    {{ old('region')=='San Martín'    ?'selected':'' }}>San Martín</option>
+                            <option value="Amazonas"      {{ old('region')=='Amazonas'      ?'selected':'' }}>Amazonas</option>
+                            <option value="Madre de Dios" {{ old('region')=='Madre de Dios' ?'selected':'' }}>Madre de Dios</option>
+                        </optgroup>
+                    </select>
+                </div>
+
+                <div class="form-group">
                     <label class="form-label" for="ugel">UGEL</label>
                     <select id="ugel" name="ugel" class="form-input">
-                        <option value="">— Seleccionar —</option>
-                        <option value="UGEL Huancavelica"    {{ old('ugel')=='UGEL Huancavelica'    ?'selected':'' }}>UGEL Huancavelica</option>
-                        <option value="UGEL Angaraes"        {{ old('ugel')=='UGEL Angaraes'        ?'selected':'' }}>UGEL Angaraes</option>
-                        <option value="UGEL Acobamba"        {{ old('ugel')=='UGEL Acobamba'        ?'selected':'' }}>UGEL Acobamba</option>
-                        <option value="UGEL Churcampa"       {{ old('ugel')=='UGEL Churcampa'       ?'selected':'' }}>UGEL Churcampa</option>
-                        <option value="UGEL Tayacaja"        {{ old('ugel')=='UGEL Tayacaja'        ?'selected':'' }}>UGEL Tayacaja</option>
-                        <option value="UGEL Huaytará"        {{ old('ugel')=='UGEL Huaytará'        ?'selected':'' }}>UGEL Huaytará</option>
-                        <option value="UGEL Castrovirreyna"  {{ old('ugel')=='UGEL Castrovirreyna'  ?'selected':'' }}>UGEL Castrovirreyna</option>
+                        <option value="">— Primero la región —</option>
                     </select>
                 </div>
 
@@ -376,11 +409,11 @@
                     </select>
                 </div>
 
-                <div class="form-group full">
+                <div class="form-group">
                     <label class="form-label" for="area_docente">Área curricular</label>
                     <select id="area_docente" name="area_docente" class="form-input">
                         <option value="">— Seleccionar —</option>
-                        <option value="Todas las áreas (primaria)" {{ old('area_docente')=='Todas las áreas (primaria)' ?'selected':'' }}>Todas las áreas (soy tutor de primaria)</option>
+                        <option value="Todas las áreas (primaria)" {{ old('area_docente')=='Todas las áreas (primaria)' ?'selected':'' }}>Todas las áreas (tutor)</option>
                         <option value="Matemática"                 {{ old('area_docente')=='Matemática'                 ?'selected':'' }}>Matemática</option>
                         <option value="Comunicación"               {{ old('area_docente')=='Comunicación'               ?'selected':'' }}>Comunicación</option>
                         <option value="Ciencia y Tecnología"       {{ old('area_docente')=='Ciencia y Tecnología'       ?'selected':'' }}>Ciencia y Tecnología</option>
@@ -414,6 +447,46 @@
         </form>
     </div>
 </div>
+<script>
+const ugelesPorRegion = {
+    'Huancavelica': ['UGEL Huancavelica','UGEL Angaraes','UGEL Acobamba','UGEL Churcampa','UGEL Tayacaja','UGEL Huaytará','UGEL Castrovirreyna'],
+    'Ayacucho': ['UGEL Huamanga','UGEL Cangallo','UGEL Huanta','UGEL La Mar','UGEL Lucanas','UGEL Parinacochas','UGEL Paucar del Sara Sara','UGEL Sucre','UGEL Víctor Fajardo','UGEL Vilcashuamán'],
+    'Apurímac': ['UGEL Abancay','UGEL Andahuaylas','UGEL Antabamba','UGEL Aymaraes','UGEL Chincheros','UGEL Cotabambas','UGEL Grau'],
+    'Cusco': ['UGEL Cusco','UGEL Acomayo','UGEL Anta','UGEL Calca','UGEL Canas','UGEL Canchis','UGEL Chumbivilcas','UGEL Espinar','UGEL La Convención','UGEL Paruro','UGEL Paucartambo','UGEL Quispicanchi','UGEL Urubamba'],
+    'Puno': ['UGEL Puno','UGEL Azángaro','UGEL Carabaya','UGEL Chucuito','UGEL El Collao','UGEL Huancané','UGEL Lampa','UGEL Melgar','UGEL Moho','UGEL San Antonio de Putina','UGEL San Román','UGEL Sandia','UGEL Yunguyo'],
+    'Junín': ['UGEL Huancayo','UGEL Chanchamayo','UGEL Chupaca','UGEL Concepción','UGEL Jauja','UGEL Junín','UGEL Satipo','UGEL Tarma','UGEL Yauli'],
+    'Lima': ['UGEL 01','UGEL 02','UGEL 03','UGEL 04','UGEL 05','UGEL 06','UGEL 07'],
+    'Arequipa': ['UGEL Arequipa Norte','UGEL Arequipa Sur','UGEL Camaná','UGEL Caravelí','UGEL Castilla','UGEL Caylloma','UGEL Condesuyos','UGEL Islay','UGEL La Unión'],
+    'La Libertad': ['UGEL Trujillo','UGEL Ascope','UGEL Bolívar','UGEL Chepén','UGEL Gran Chimú','UGEL Julcán','UGEL Otuzco','UGEL Pacasmayo','UGEL Pataz','UGEL Sánchez Carrión','UGEL Santiago de Chuco','UGEL Virú'],
+    'Piura': ['UGEL Piura','UGEL Ayabaca','UGEL Huancabamba','UGEL Morropón','UGEL Paita','UGEL Sechura','UGEL Sullana','UGEL Talara'],
+    'Loreto': ['UGEL Maynas','UGEL Alto Amazonas','UGEL Datem del Marañón','UGEL Loreto','UGEL Mariscal Ramón Castilla','UGEL Putumayo','UGEL Requena','UGEL Ucayali'],
+    'San Martín': ['UGEL San Martín','UGEL Bellavista','UGEL El Dorado','UGEL Huallaga','UGEL Lamas','UGEL Mariscal Cáceres','UGEL Moyobamba','UGEL Picota','UGEL Rioja','UGEL Tocache'],
+};
 
+function updateUgeles() {
+    const region = document.getElementById('region').value;
+    const ugelSelect = document.getElementById('ugel');
+    ugelSelect.innerHTML = '<option value="">— Seleccionar UGEL —</option>';
+
+    const ugeles = ugelesPorRegion[region] || [`UGEL ${region}`];
+    ugeles.forEach(u => {
+        const opt = document.createElement('option');
+        opt.value = u;
+        opt.textContent = u;
+        ugelSelect.appendChild(opt);
+    });
+
+    // Si no hay UGELs definidas mostrar campo libre
+    if (!ugelesPorRegion[region]) {
+        ugelSelect.innerHTML = '';
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.name = 'ugel';
+        input.className = 'form-input';
+        input.placeholder = `Ej: UGEL ${region}`;
+        ugelSelect.parentNode.replaceChild(input, ugelSelect);
+    }
+}
+</script>
 </body>
 </html>

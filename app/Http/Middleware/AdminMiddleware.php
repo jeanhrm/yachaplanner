@@ -9,7 +9,7 @@ class AdminMiddleware
 {
     // Emails con acceso al panel admin
     private array $adminEmails = [
-        'jean@quipubit.com',
+        'jean@gmail.com',
         'ventas@quipubit.com',
     ];
 

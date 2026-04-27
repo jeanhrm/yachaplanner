@@ -800,6 +800,8 @@
         }
 
         function getContextoPedagogico() {
+            ctx += `Región: {{ auth()->user()->region ?? 'Perú' }}. `;
+            ctx += `UGEL: {{ auth()->user()->ugel ?? '' }}. `;
             const nivel  = document.getElementById('ctx-nivel').value;
             const grado  = document.getElementById('ctx-grado').value;
             const area   = document.getElementById('ctx-area-docente').value;
@@ -855,6 +857,8 @@
             const prompt = `Eres YachaPlanner, asistente pedagógico STEAM para docentes de Huancavelica, Perú.
 
 Un docente configuró este contexto:
+- Región: {{ auth()->user()->region ?? 'Perú' }}
+- UGEL: {{ auth()->user()->ugel ?? 'no especificada' }}
 - Nivel: ${nivel || 'no especificado'}
 - Grado: ${grado || 'no especificado'}
 - Área del docente: ${area || 'no especificada'}
