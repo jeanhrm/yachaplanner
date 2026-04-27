@@ -346,7 +346,7 @@
             </div>
         </div>
 
-        <div class="left-badge">🦙 Hecho para docentes de Huancavelica</div>
+        <div class="left-badge">🦙 Hecho para docentes innovadores</div>
     </div>
 </div>
 

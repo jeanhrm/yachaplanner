@@ -135,7 +135,7 @@
 
 <!-- HERO -->
 <section class="hero">
-    <div class="hero-badge">🏔️ Hecho para Huancavelica</div>
+    <div class="hero-badge">🏔️ Hecho para docentes innovadores</div>
     <h1>Planificaciones STEAM en <em>minutos</em>,<br>no en horas</h1>
     <p>YachaPlanner usa inteligencia artificial para generar sesiones de aprendizaje, proyectos ABP y rúbricas alineadas al CNEB, con contexto andino real.</p>
     <div class="hero-btns">
@@ -147,7 +147,7 @@
         @endauth
     </div>
     <div class="hero-stats">
-        <div class="stat"><div class="stat-num">7</div><div class="stat-label">UGELs de Huancavelica</div></div>
+        <div class="stat"><div class="stat-num">100</div><div class="stat-label">UGELs a nivel nacional</div></div>
         <div class="stat"><div class="stat-num">4</div><div class="stat-label">Módulos pedagógicos</div></div>
         <div class="stat"><div class="stat-num">∞</div><div class="stat-label">Contextos andinos</div></div>
         <div class="stat"><div class="stat-num">Word</div><div class="stat-label">Exportación directa</div></div>
