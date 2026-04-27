@@ -174,7 +174,7 @@
             <div class="problem-card">
                 <div class="icon">🌐</div>
                 <h3>Sin contexto local</h3>
-                <p>Las herramientas existentes ignoran la realidad de Huancavelica: papa nativa, quechua, heladas, río Ichu.</p>
+                <p>Las herramientas existentes ignoran la realidad de las regiones: idioma, heladas, ríos, culturas, historias, productos, entre otros</p>
             </div>
         </div>
     </div>
@@ -185,7 +185,7 @@
     <div class="section-inner">
         <div class="section-label">La solución</div>
         <h2 class="section-title">4 módulos para toda tu planificación</h2>
-        <p class="section-sub">Cada módulo genera documentos completos alineados al CNEB con enfoque STEAM y contexto huancavelicano.</p>
+        <p class="section-sub">Cada módulo genera documentos completos alineados al CNEB con enfoque STEAM y contexto por cada región.</p>
         <div class="modules-grid">
             <div class="module-card">
                 <div class="module-icon">📅</div>
