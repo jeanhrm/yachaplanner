@@ -245,7 +245,9 @@
             <a href="{{ route('chat.index') }}" class="yp-nav-link {{ request()->routeIs('chat.*') ? 'active' : '' }}">
                 ✍️ Planificador
             </a>
-
+            <a href="{{ route('credits.index') }}" class="yp-nav-link {{ request()->routeIs('credits.*') ? 'active' : '' }}">
+                ⚡ Créditos
+            </a>
             <div class="yp-nav-divider"></div>
 
             {{-- Usuario --}}

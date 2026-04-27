@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ChatController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ExportController;
+use App\Http\Controllers\CreditsController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -22,6 +23,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/chat', [ChatController::class, 'store'])->name('chat.store');
 
     Route::get('/export/word/{session}', [ExportController::class, 'word'])->name('export.word');
+    Route::get('/creditos', [CreditsController::class, 'index'])->name('credits.index');
 });
 
 require __DIR__.'/auth.php';
