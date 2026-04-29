@@ -73,22 +73,14 @@ class ChatController extends Controller
             'content'    => $request->message,
         ]);
 
-        // Construir historial para Claude — máximo últimos 6 mensajes
+        // Construir historial
         $history = ChatMessage::where('session_id', $session->id)
                             ->orderBy('created_at')
                             ->get()
                             ->map(fn($m) => [
                                 'role'    => $m->role,
-                                'content' => mb_substr($m->content, 0, 3000), // truncar mensajes muy largos
-                            ])
-                            ->takeLast(6) // solo los últimos 6 mensajes
-                            ->values()
-                            ->toArray();
-
-        // Asegurar que el primer mensaje sea siempre del usuario
-        if (!empty($history) && $history[0]['role'] === 'assistant') {
-            array_shift($history);
-        }       
+                                'content' => $m->content,
+                            ])->toArray();
 
         // Construir system prompt
         $context = [
