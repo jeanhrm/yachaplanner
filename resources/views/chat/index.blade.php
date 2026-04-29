@@ -387,7 +387,9 @@
             docList.innerHTML = docs.map(d => {
                 const tag = tagLabels[d.tag];
                 const safeName = d.name.replace(/'/g, '&#39;');
-                return `<button onclick="selectModulo('${d.slug}','${safeName}','${d.icon}')" id="btn-${d.slug}" class="doc-btn">
+                return `<button onclick="selectModulo('${d.slug}','${safeName}')"
+                    data-icon="${d.icon}"
+                    id="btn-${d.slug}" class="doc-btn">
                     <div class="doc-btn-header"><span>${d.icon}</span><span>${d.name}</span></div>
                     <div class="doc-desc">${d.desc}</div>
                     <span class="doc-tag ${tag.class}">${tag.label}</span>
@@ -505,11 +507,13 @@
         }
 
         // ===== MÓDULOS =====
-        function selectModulo(slug, name, icon = '📄') {
+        function selectModulo(slug, name) {
+            const btn = document.getElementById('btn-' + slug);
+            const icon = btn ? btn.dataset.icon : '📄';
             currentModule = slug;
             currentSessionId = null;
             document.querySelectorAll('.doc-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('btn-' + slug)?.classList.add('active');
+            btn?.classList.add('active');
             document.getElementById('export-btn').style.display = 'none';
             document.getElementById('module-label').textContent = name;
             document.getElementById('current-module-name').textContent = name;
