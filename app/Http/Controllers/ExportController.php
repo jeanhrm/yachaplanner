@@ -27,45 +27,12 @@ class ExportController extends Controller
         }
 
         $phpWord = new PhpWord();
-        $phpWord->setDefaultFontName('Arial');
-        $phpWord->setDefaultFontSize(11);
+        $section = $phpWord->addSection();
+        
+        // Solo agregar una línea fija para probar
+        $section->addText('Contenido exportado correctamente.');
 
-        $phpWord->addTitleStyle(1, [
-            'bold' => true, 'size' => 16, 'color' => '1a7a4a',
-        ], ['spaceAfter' => 200]);
-
-        $phpWord->addTitleStyle(2, [
-            'bold' => true, 'size' => 13, 'color' => '1a7a4a',
-        ], ['spaceAfter' => 120, 'spaceBefore' => 240]);
-
-        $phpWord->addTitleStyle(3, [
-            'bold' => true, 'size' => 11, 'color' => '374151',
-        ], ['spaceAfter' => 80, 'spaceBefore' => 160]);
-
-        $section = $phpWord->addSection([
-            'marginTop'    => 1440,
-            'marginBottom' => 1440,
-            'marginLeft'   => 1440,
-            'marginRight'  => 1440,
-        ]);
-
-        $header = $section->addHeader();
-        $header->addText(
-            'YachaPlanner — Planificación Curricular STEAM',
-            ['bold' => true, 'size' => 9, 'color' => '1a7a4a'],
-            ['alignment' => Jc::RIGHT]
-        );
-
-        $footer = $section->addFooter();
-        $footer->addText(
-            'Generado con YachaPlanner · yachaplanner-production.up.railway.app',
-            ['size' => 8, 'color' => '999999'],
-            ['alignment' => Jc::CENTER]
-        );
-
-        $this->parseMarkdownToWord($section, $lastAssistant->content);
-
-        $filename = 'yachaplanner_' . $session->module . '_' . date('Ymd_His') . '.docx';
+        $filename = 'test_' . date('Ymd_His') . '.docx';
         $tempPath = sys_get_temp_dir() . '/' . $filename;
 
         $writer = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'Word2007');
