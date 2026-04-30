@@ -137,24 +137,11 @@ class ExportController extends Controller
 
     private function renderTable($section, array $tableLines): void
     {
-        $rows = array_values(array_filter(
-            $tableLines,
-            fn($l) => !preg_match('/^\|[\s\-|:]+\|$/', $l)
-        ));
-
-        if (empty($rows)) return;
-
-        foreach ($rows as $i => $row) {
-            $cells = array_values(array_filter(
-                array_map('trim', explode('|', trim($row, '|'))),
-                fn($c) => $c !== ''
-            ));
-
-            $text = implode(' | ', $cells);
-            
-            if (empty($text)) continue;
-
-            $section->addText($text, ['size' => 10]);
+        foreach ($tableLines as $line) {
+            $clean = $this->cleanText($line);
+            if ($clean !== '') {
+                $section->addText($clean, ['size' => 10]);
+            }
         }
     }
     
