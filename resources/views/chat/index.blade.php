@@ -566,7 +566,12 @@ Tono cálido, motivador. Sin markdown — párrafo conversacional en español.`;
                 const res = await fetch('{{ route("chat.store") }}', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
-                    body: JSON.stringify({ module: slug, message: prompt, session_id: null })
+                    body: JSON.stringify({ 
+                    module: slug, 
+                    message: prompt, 
+                    session_id: null,
+                    _es_sugerencia: true,
+                })
                 });
 
                 const reader = res.body.getReader();

@@ -66,22 +66,27 @@ class ChatController extends Controller
         }
 
         // Guardar mensaje del usuario
+        // Si es sugerencia interna no guardamos el prompt largo
+        $esInterna = $request->boolean('_es_sugerencia');
+
         ChatMessage::create([
             'session_id' => $session->id,
             'user_id'    => $user->id,
             'role'       => 'user',
-            'content'    => $request->message,
+            'content'    => $esInterna ? '__sugerencia_interna__' : $request->message,
         ]);
 
         // Construir historial para Claude — máximo últimos 6 mensajes
         $allMessages = ChatMessage::where('session_id', $session->id)
-                                ->orderBy('created_at')
-                                ->get()
-                                ->map(fn($m) => [
-                                    'role'    => $m->role,
-                                    'content' => mb_substr($m->content, 0, 2000),
-                                ])
-                                ->toArray();
+                          ->orderBy('created_at')
+                          ->get()
+                          ->map(fn($m) => [
+                              'role'    => $m->role,
+                              'content' => $m->content === '__sugerencia_interna__'
+                                  ? $request->message // usamos el real para contexto de Claude
+                                  : mb_substr($m->content, 0, 2000),
+                          ])
+                          ->toArray();
 
         // Tomar solo los últimos 6
         $history = array_slice($allMessages, -6);
