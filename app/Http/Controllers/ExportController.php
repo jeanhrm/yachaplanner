@@ -91,7 +91,7 @@ class ExportController extends Controller
                 $tag      = $isHeader ? 'th' : 'td';
                 $tableHtml .= '<tr>';
                 foreach ($cells as $cell) {
-                    $tableHtml .= "<{$tag}>" . htmlspecialchars($cell) . "</{$tag}>";
+                    $tableHtml .= "<{$tag}>" . $this->inlineFormat($cell) . "</{$tag}>";
                 }
                 $tableHtml .= '</tr>';
                 continue;
