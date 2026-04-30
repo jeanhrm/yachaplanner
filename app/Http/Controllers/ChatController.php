@@ -18,10 +18,11 @@ class ChatController extends Controller
                                ->get();
 
         $sessions = ChatSession::where('user_id', Auth::id())
-                               ->where('status', 'active')
-                               ->orderByDesc('last_message_at')
-                               ->take(10)
-                               ->get();
+                       ->where('status', 'active')
+                       ->whereNotIn('title', ['Nueva sesión', '__sugerencia_interna__'])
+                       ->orderByDesc('updated_at')
+                       ->take(6)
+                       ->get();
 
         return view('chat.index', compact('modules', 'sessions'));
     }
@@ -54,7 +55,7 @@ class ChatController extends Controller
             $session = ChatSession::create([
                 'user_id'               => $user->id,
                 'module'                => $request->module,
-                'title'                 => substr($request->message, 0, 60),
+                'title'                 => $esInterna ? 'Nueva sesión' :substr($request->message, 0, 60),
                 'system_prompt_version' => $module->version,
                 'injected_context'      => [
                     'institution'   => $user->institution?->name ?? 'IE de Huancavelica',
