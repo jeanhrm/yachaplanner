@@ -142,12 +142,35 @@ class ExportController extends Controller
     }
 
     private function inlineFormat(string $text): string
-    {
-        // Bold
-        $text = preg_replace('/\*\*([^*]+)\*\*/', '<strong>$1</strong>', $text);
-        // Italic
-        $text = preg_replace('/\*([^*]+)\*/', '<em>$1</em>', $text);
-        // Escapar caracteres HTML excepto los tags que acabamos de crear
-        return $text;
+{
+    $bolds   = [];
+    $italics = [];
+
+    // Extraer bold **texto** antes de escapar
+    $text = preg_replace_callback('/\*\*([^*]+)\*\*/', function($m) use (&$bolds) {
+        $key = '%%BOLD' . count($bolds) . '%%';
+        $bolds[$key] = '<strong>' . htmlspecialchars($m[1], ENT_QUOTES, 'UTF-8') . '</strong>';
+        return $key;
+    }, $text);
+
+    // Extraer italic *texto* antes de escapar
+    $text = preg_replace_callback('/\*([^*]+)\*/', function($m) use (&$italics) {
+        $key = '%%ITALIC' . count($italics) . '%%';
+        $italics[$key] = '<em>' . htmlspecialchars($m[1], ENT_QUOTES, 'UTF-8') . '</em>';
+        return $key;
+    }, $text);
+
+    // Escapar el resto
+    $text = htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
+
+    // Restaurar bold e italic
+    foreach ($bolds as $key => $val) {
+        $text = str_replace(htmlspecialchars($key, ENT_QUOTES, 'UTF-8'), $val, $text);
+    }
+    foreach ($italics as $key => $val) {
+        $text = str_replace(htmlspecialchars($key, ENT_QUOTES, 'UTF-8'), $val, $text);
+    }
+
+    return $text;
     }
 }
