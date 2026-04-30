@@ -68,6 +68,8 @@ class ExportController extends Controller
 
     private function markdownToHtml(string $markdown): string
     {
+        $markdown = str_replace(['<br>', '<br/>', '<br />'], "\n", $markdown);
+    
         $lines   = explode("\n", $markdown);
         $html    = '';
         $inTable = false;
@@ -91,6 +93,9 @@ class ExportController extends Controller
                 $tag      = $isHeader ? 'th' : 'td';
                 $tableHtml .= '<tr>';
                 foreach ($cells as $cell) {
+                    // Convertir listas con • en líneas separadas
+                    $cell = str_replace('• ', '<br>• ', $cell);
+                    $cell = ltrim($cell, '<br>');
                     $tableHtml .= "<{$tag}>" . $this->inlineFormat($cell) . "</{$tag}>";
                 }
                 $tableHtml .= '</tr>';
@@ -143,6 +148,7 @@ class ExportController extends Controller
 
     private function inlineFormat(string $text): string
 {
+    $text = str_replace('<br>', '%%BR%%', $text);
     $bolds   = [];
     $italics = [];
 
@@ -170,7 +176,7 @@ class ExportController extends Controller
     foreach ($italics as $key => $val) {
         $text = str_replace(htmlspecialchars($key, ENT_QUOTES, 'UTF-8'), $val, $text);
     }
-
+    $text = str_replace('%%BR%%', '<br>', $text);
     return $text;
     }
 }
