@@ -27,25 +27,21 @@ class ExportController extends Controller
         }
 
         $phpWord = new PhpWord();
-        $section = $phpWord->addSection();
+        $phpWord->setDefaultFontName('Arial');
+        $phpWord->setDefaultFontSize(11);
 
-        $content = $lastAssistant->content;
+        $section = $phpWord->addSection([
+            'marginTop'    => 1440,
+            'marginBottom' => 1440,
+            'marginLeft'   => 1440,
+            'marginRight'  => 1440,
+        ]);
 
-        // Eliminar todo excepto letras, números, puntuación básica y saltos de línea
-        $content = preg_replace('/[^\p{L}\p{N}\p{P}\p{Z}\n\r ]/u', '', $content);
-        $content = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', '', $content);
+        $content = $this->sanitize($lastAssistant->content);
 
-        $lines = explode("\n", $content);
-        foreach ($lines as $line) {
-            $line = trim($line);
-            if (empty($line)) {
-                $section->addTextBreak(1);
-                continue;
-            }
-            $section->addText($line, ['size' => 11]);
-        }
+        $this->parseMarkdownToWord($section, $content);
 
-        $filename = 'yachaplanner_' . date('Ymd_His') . '.docx';
+        $filename = 'yachaplanner_' . $session->module . '_' . date('Ymd_His') . '.docx';
         $tempPath = sys_get_temp_dir() . '/' . $filename;
 
         $writer = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'Word2007');
@@ -56,27 +52,95 @@ class ExportController extends Controller
         ])->deleteFileAfterSend(true);
     }
 
+    private function sanitize(string $text): string
+    {
+        // Eliminar emojis y símbolos especiales
+        $text = preg_replace('/[\x{1F000}-\x{1FFFF}]/u', '', $text);
+        $text = preg_replace('/[\x{2600}-\x{27BF}]/u', '', $text);
+        $text = preg_replace('/[\x{1F300}-\x{1F9FF}]/u', '', $text);
+        $text = preg_replace('/[\x{2702}-\x{27B0}]/u', '', $text);
+        // Eliminar caracteres de control XML inválidos
+        $text = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', '', $text);
+        return $text;
+    }
+
+    private function cleanText(string $text): string
+    {
+        $text = preg_replace('/[*_`#~]/', '', $text);
+        $text = html_entity_decode($text, ENT_QUOTES, 'UTF-8');
+        $text = $this->sanitize($text);
+        return trim($text);
+    }
+
     private function parseMarkdownToWord($section, string $markdown): void
     {
-        // Limpiar agresivamente todo
-        $clean = preg_replace('/[^\x20-\x7E\x0A\x0D]/u', '', $markdown);
-        
-        $lines = explode("\n", $clean);
+        $lines      = explode("\n", $markdown);
+        $tableLines = [];
+        $inTable    = false;
+
         foreach ($lines as $line) {
-            $line = trim($line);
-            if (empty($line)) {
+            $trimmed = trim($line);
+
+            if (str_starts_with($trimmed, '|')) {
+                $inTable      = true;
+                $tableLines[] = $trimmed;
+                continue;
+            }
+
+            if ($inTable) {
+                $this->renderTable($section, $tableLines);
+                $tableLines = [];
+                $inTable    = false;
+            }
+
+            if (empty($trimmed)) {
                 $section->addTextBreak(1);
                 continue;
             }
-            // Solo texto, sin ningún formato
-            $section->addText($line, ['size' => 11]);
+
+            if (preg_match('/^### (.+)/', $trimmed, $m)) {
+                $section->addText(
+                    $this->cleanText($m[1]),
+                    ['bold' => true, 'size' => 11, 'color' => '374151'],
+                    ['spaceAfter' => 80, 'spaceBefore' => 160]
+                );
+            } elseif (preg_match('/^## (.+)/', $trimmed, $m)) {
+                $section->addText(
+                    $this->cleanText($m[1]),
+                    ['bold' => true, 'size' => 13, 'color' => '1a7a4a'],
+                    ['spaceAfter' => 120, 'spaceBefore' => 240]
+                );
+            } elseif (preg_match('/^# (.+)/', $trimmed, $m)) {
+                $section->addText(
+                    $this->cleanText($m[1]),
+                    ['bold' => true, 'size' => 16, 'color' => '1a7a4a'],
+                    ['spaceAfter' => 200]
+                );
+            } elseif (preg_match('/^[-*]\s+(.+)/', $trimmed, $m)) {
+                $section->addText(
+                    '• ' . $this->cleanText($m[1]),
+                    ['size' => 11],
+                    ['spaceAfter' => 40, 'indentation' => ['left' => 360]]
+                );
+            } elseif (str_starts_with($trimmed, '---')) {
+                $section->addTextBreak(1);
+            } else {
+                $clean = preg_replace('/\*\*([^*]+)\*\*/', '$1', $trimmed);
+                $clean = preg_replace('/\*([^*]+)\*/', '$1', $clean);
+                $clean = $this->cleanText($clean);
+                if ($clean !== '') {
+                    $section->addText($clean, ['size' => 11], ['spaceAfter' => 60]);
+                }
+            }
+        }
+
+        if ($inTable && count($tableLines) > 0) {
+            $this->renderTable($section, $tableLines);
         }
     }
 
-
     private function renderTable($section, array $tableLines): void
     {
-        // Filtrar separadores
         $rows = array_values(array_filter(
             $tableLines,
             fn($l) => !preg_match('/^\|[\s\-|:]+\|$/', $l)
@@ -84,78 +148,49 @@ class ExportController extends Controller
 
         if (empty($rows)) return;
 
+        $firstCells = array_values(array_filter(
+            array_map('trim', explode('|', trim($rows[0], '|'))),
+            fn($c) => $c !== ''
+        ));
+        $numCols = count($firstCells);
+        if ($numCols < 1) return;
+
+        $cellWidth = (int) floor(8640 / $numCols);
+
+        $table = $section->addTable([
+            'borderSize'  => 4,
+            'borderColor' => '1a7a4a',
+            'cellMargin'  => 80,
+        ]);
+
         foreach ($rows as $i => $row) {
-            $cells   = array_map('trim', explode('|', trim($row, '|')));
-            $cells   = array_filter($cells, fn($c) => $c !== '');
-            $cells   = array_values($cells);
+            $cells = array_values(array_filter(
+                array_map('trim', explode('|', trim($row, '|'))),
+                fn($c) => $c !== ''
+            ));
+
             $isHeader = ($i === 0);
-            $text    = implode('   |   ', array_map([$this, 'cleanText'], $cells));
+            $bgColor  = $isHeader ? '1a7a4a' : ($i % 2 === 0 ? 'f0fdf4' : 'ffffff');
 
-            if ($text === '') continue;
+            while (count($cells) < $numCols) $cells[] = '';
+            $cells = array_slice($cells, 0, $numCols);
 
-            $section->addText(
-                $text,
-                [
-                    'bold'  => $isHeader,
-                    'size'  => $isHeader ? 11 : 10,
-                    'color' => $isHeader ? '1a7a4a' : '111827',
-                ],
-                [
-                    'spaceAfter'  => $isHeader ? 40 : 20,
-                    'spaceBefore' => $isHeader ? 80 : 0,
-                ]
-            );
+            $table->addRow();
+
+            foreach ($cells as $cellText) {
+                $clean = $this->cleanText($cellText);
+                $td    = $table->addCell($cellWidth, ['bgColor' => $bgColor]);
+                $td->addText(
+                    $clean !== '' ? $clean : ' ',
+                    [
+                        'bold'  => $isHeader,
+                        'color' => $isHeader ? 'ffffff' : '111827',
+                        'size'  => 10,
+                    ]
+                );
+            }
         }
 
         $section->addTextBreak(1);
-    }
-
-    private function addFormattedText($run, string $text): void
-    {
-        $parts = preg_split('/(\*\*[^*]+\*\*|\*[^*]+\*)/', $text, -1, PREG_SPLIT_DELIM_CAPTURE);
-        foreach ($parts as $part) {
-            if (str_starts_with($part, '**') && str_ends_with($part, '**')) {
-                $run->addText(
-                    $this->cleanText(substr($part, 2, -2)),
-                    ['bold' => true, 'size' => 11]
-                );
-            } elseif (str_starts_with($part, '*') && str_ends_with($part, '*')) {
-                $run->addText(
-                    $this->cleanText(substr($part, 1, -1)),
-                    ['italic' => true, 'size' => 11]
-                );
-            } else {
-                $cleaned = $this->cleanText($part);
-                if ($cleaned !== '') {
-                    $run->addText($cleaned, ['size' => 11]);
-                }
-            }
-        }
-    }
-
-    private function sanitizeContent(string $content): string
-    {
-        // Eliminar emojis completamente
-        $content = preg_replace('/[\x{1F000}-\x{1FFFF}]/u', '', $content);
-        $content = preg_replace('/[\x{2600}-\x{27BF}]/u', '', $content);
-        $content = preg_replace('/[\x{1F300}-\x{1F64F}]/u', '', $content);
-        $content = preg_replace('/[\x{1F680}-\x{1F6FF}]/u', '', $content);
-        $content = preg_replace('/[\x{2702}-\x{27B0}]/u', '', $content);
-
-        // Eliminar caracteres de control inválidos en XML
-        $content = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/u', '', $content);
-
-        // Reemplazar caracteres especiales problemáticos
-        $content = str_replace(['✅', '❌', '⚡', '🌱', '📝', '📅', '🔬', '✅', '🏃', '🎨', '💼', '🕊️', '🗺️', '🤝', '🏘️', '🌐', '📰', '📐'], '', $content);
-
-        return $content;
-    }
-
-    private function cleanText(string $text): string
-    {
-        $text = preg_replace('/[*_`#~]/', '', $text);
-        $text = html_entity_decode($text, ENT_QUOTES, 'UTF-8');
-        $text = $this->sanitizeContent($text);
-        return trim($text);
     }
 }
