@@ -74,13 +74,24 @@ class ExportController extends Controller
 
     private function parseMarkdownToWord($section, string $markdown): void
     {
-        $lines = explode("\n", $markdown);
+        $lines      = explode("\n", $markdown);
+        $tableLines = [];
+        $inTable    = false;
 
         foreach ($lines as $line) {
             $trimmed = trim($line);
 
-            // Saltar tablas completamente por ahora
-            if (str_starts_with($trimmed, '|')) continue;
+            if (str_starts_with($trimmed, '|')) {
+                $inTable      = true;
+                $tableLines[] = $trimmed;
+                continue;
+            }
+
+            if ($inTable) {
+                $this->renderTable($section, $tableLines);
+                $tableLines = [];
+                $inTable    = false;
+            }
 
             if (empty($trimmed)) {
                 $section->addTextBreak(1);
@@ -118,11 +129,15 @@ class ExportController extends Controller
                 }
             }
         }
+
+        if ($inTable && count($tableLines) > 0) {
+            $this->renderTable($section, $tableLines);
+        }
     }
-    
 
     private function renderTable($section, array $tableLines): void
     {
+        // Filtrar separadores |---|
         $rows = array_values(array_filter(
             $tableLines,
             fn($l) => !preg_match('/^\|[\s\-|:]+\|$/', $l)
@@ -130,6 +145,7 @@ class ExportController extends Controller
 
         if (empty($rows)) return;
 
+        // Contar columnas desde la primera fila
         $firstCells = array_values(array_filter(
             array_map('trim', explode('|', trim($rows[0], '|'))),
             fn($c) => $c !== ''
@@ -139,11 +155,7 @@ class ExportController extends Controller
 
         $cellWidth = (int) floor(8640 / $numCols);
 
-        $table = $section->addTable([
-            'borderSize'  => 4,
-            'borderColor' => '1a7a4a',
-            'cellMargin'  => 80,
-        ]);
+        $table = $section->addTable();
 
         foreach ($rows as $i => $row) {
             $cells = array_values(array_filter(
@@ -151,28 +163,24 @@ class ExportController extends Controller
                 fn($c) => $c !== ''
             ));
 
-            $isHeader = ($i === 0);
-            $bgColor  = $isHeader ? '1a7a4a' : ($i % 2 === 0 ? 'f0fdf4' : 'ffffff');
-
-            while (count($cells) < $numCols) $cells[] = '';
+            while (count($cells) < $numCols) $cells[] = ' ';
             $cells = array_slice($cells, 0, $numCols);
+
+            $isHeader = ($i === 0);
 
             $table->addRow();
 
             foreach ($cells as $cellText) {
                 $clean = $this->cleanText($cellText);
-                $td    = $table->addCell($cellWidth, ['bgColor' => $bgColor]);
+                $td    = $table->addCell($cellWidth);
                 $td->addText(
                     $clean !== '' ? $clean : ' ',
-                    [
-                        'bold'  => $isHeader,
-                        'color' => $isHeader ? 'ffffff' : '111827',
-                        'size'  => 10,
-                    ]
+                    ['bold' => $isHeader, 'size' => 10]
                 );
             }
         }
 
         $section->addTextBreak(1);
     }
+    
 }
