@@ -78,51 +78,33 @@ class ExportController extends Controller
 
     private function parseMarkdownToWord($section, string $markdown): void
     {
-        // Limpiar todo el contenido primero
         $markdown = $this->sanitizeContent($markdown);
-        $lines    = explode("\n", $markdown);
-
-        $tableLines = [];
-        $inTable    = false;
-
+        
+        // Dividir por líneas y escribir todo como texto simple
+        $lines = explode("\n", $markdown);
+        
         foreach ($lines as $line) {
             $trimmed = trim($line);
-
-            if (str_starts_with($trimmed, '|')) {
-                $inTable      = true;
-                $tableLines[] = $trimmed;
-                continue;
-            }
-
-            if ($inTable) {
-                $this->renderTable($section, $tableLines);
-                $tableLines = [];
-                $inTable    = false;
-            }
-
+            
+            // Saltar líneas de tabla por ahora
+            if (str_starts_with($trimmed, '|')) continue;
+            
             if (empty($trimmed)) {
                 $section->addTextBreak(1);
                 continue;
             }
-
-            if (str_starts_with($trimmed, '### ')) {
-                $section->addTitle($this->cleanText(substr($trimmed, 4)), 3);
-            } elseif (str_starts_with($trimmed, '## ')) {
-                $section->addTitle($this->cleanText(substr($trimmed, 3)), 2);
-            } elseif (str_starts_with($trimmed, '# ')) {
-                $section->addTitle($this->cleanText(substr($trimmed, 2)), 1);
-            } elseif (preg_match('/^[-*]\s+(.+)/', $trimmed, $m)) {
-                $section->addListItem($this->cleanText($m[1]), 0, ['size' => 11]);
-            } elseif (str_starts_with($trimmed, '---')) {
-                $section->addTextBreak(1);
-            } else {
-                $run = $section->addTextRun(['spaceAfter' => 80]);
-                $this->addFormattedText($run, $trimmed);
+            
+            // Limpiar todo markdown
+            $clean = preg_replace('/^#{1,6}\s+/', '', $trimmed);
+            $clean = preg_replace('/\*\*([^*]+)\*\*/', '$1', $clean);
+            $clean = preg_replace('/\*([^*]+)\*/', '$1', $clean);
+            $clean = preg_replace('/^[-*]\s+/', '• ', $clean);
+            $clean = preg_replace('/[*_`#~]/', '', $clean);
+            $clean = trim($clean);
+            
+            if ($clean !== '') {
+                $section->addText($clean, ['size' => 11], ['spaceAfter' => 60]);
             }
-        }
-
-        if ($inTable && count($tableLines) > 0) {
-            $this->renderTable($section, $tableLines);
         }
     }
 
