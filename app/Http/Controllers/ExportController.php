@@ -200,11 +200,18 @@ class ExportController extends Controller
 
     private function sanitizeContent(string $content): string
     {
-        // Eliminar emojis y caracteres especiales que corrompen XML de Word
+        // Eliminar emojis completamente
+        $content = preg_replace('/[\x{1F000}-\x{1FFFF}]/u', '', $content);
+        $content = preg_replace('/[\x{2600}-\x{27BF}]/u', '', $content);
+        $content = preg_replace('/[\x{1F300}-\x{1F64F}]/u', '', $content);
+        $content = preg_replace('/[\x{1F680}-\x{1F6FF}]/u', '', $content);
+        $content = preg_replace('/[\x{2702}-\x{27B0}]/u', '', $content);
+
+        // Eliminar caracteres de control inválidos en XML
         $content = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/u', '', $content);
 
-        // Eliminar caracteres Unicode fuera del rango básico (emojis, símbolos especiales)
-        $content = preg_replace('/[^\x09\x0A\x0D\x20-\x7E\xA0-\x{D7FF}\x{E000}-\x{FFFD}]/u', '', $content);
+        // Reemplazar caracteres especiales problemáticos
+        $content = str_replace(['✅', '❌', '⚡', '🌱', '📝', '📅', '🔬', '✅', '🏃', '🎨', '💼', '🕊️', '🗺️', '🤝', '🏘️', '🌐', '📰', '📐'], '', $content);
 
         return $content;
     }
