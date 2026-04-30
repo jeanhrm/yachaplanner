@@ -78,38 +78,60 @@ class ExportController extends Controller
 
     private function parseMarkdownToWord($section, string $markdown): void
     {
-        $markdown = $this->sanitizeContent($markdown);
-        
-        // Dividir por líneas y escribir todo como texto simple
-        $lines = explode("\n", $markdown);
-        
+        $markdown   = $this->sanitizeContent($markdown);
+        $lines      = explode("\n", $markdown);
+        $tableLines = [];
+        $inTable    = false;
+
         foreach ($lines as $line) {
             $trimmed = trim($line);
-            
-            // Saltar líneas de tabla por ahora
-            if (str_starts_with($trimmed, '|')) continue;
-            
+
+            if (str_starts_with($trimmed, '|')) {
+                $inTable      = true;
+                $tableLines[] = $trimmed;
+                continue;
+            }
+
+            if ($inTable) {
+                $this->renderTable($section, $tableLines);
+                $tableLines = [];
+                $inTable    = false;
+            }
+
             if (empty($trimmed)) {
                 $section->addTextBreak(1);
                 continue;
             }
-            
-            // Limpiar todo markdown
-            $clean = preg_replace('/^#{1,6}\s+/', '', $trimmed);
-            $clean = preg_replace('/\*\*([^*]+)\*\*/', '$1', $clean);
-            $clean = preg_replace('/\*([^*]+)\*/', '$1', $clean);
-            $clean = preg_replace('/^[-*]\s+/', '• ', $clean);
-            $clean = preg_replace('/[*_`#~]/', '', $clean);
-            $clean = trim($clean);
-            
-            if ($clean !== '') {
-                $section->addText($clean, ['size' => 11], ['spaceAfter' => 60]);
+
+            // Headings
+            if (preg_match('/^### (.+)/', $trimmed, $m)) {
+                $section->addText($this->cleanText($m[1]), ['bold' => true, 'size' => 11, 'color' => '374151'], ['spaceAfter' => 80, 'spaceBefore' => 160]);
+            } elseif (preg_match('/^## (.+)/', $trimmed, $m)) {
+                $section->addText($this->cleanText($m[1]), ['bold' => true, 'size' => 13, 'color' => '1a7a4a'], ['spaceAfter' => 120, 'spaceBefore' => 240, 'borderBottomSize' => 4, 'borderBottomColor' => 'd1fae5']);
+            } elseif (preg_match('/^# (.+)/', $trimmed, $m)) {
+                $section->addText($this->cleanText($m[1]), ['bold' => true, 'size' => 16, 'color' => '1a7a4a'], ['spaceAfter' => 200]);
+            } elseif (preg_match('/^[-*]\s+(.+)/', $trimmed, $m)) {
+                $section->addText('• ' . $this->cleanText($m[1]), ['size' => 11], ['spaceAfter' => 40, 'indentation' => ['left' => 360]]);
+            } elseif (str_starts_with($trimmed, '---')) {
+                $section->addTextBreak(1);
+            } else {
+                $clean = preg_replace('/\*\*([^*]+)\*\*/', '$1', $trimmed);
+                $clean = preg_replace('/\*([^*]+)\*/', '$1', $clean);
+                $clean = $this->cleanText($clean);
+                if ($clean !== '') {
+                    $section->addText($clean, ['size' => 11], ['spaceAfter' => 60]);
+                }
             }
+        }
+
+        if ($inTable && count($tableLines) > 0) {
+            $this->renderTable($section, $tableLines);
         }
     }
 
     private function renderTable($section, array $tableLines): void
     {
+        // Filtrar separadores
         $rows = array_values(array_filter(
             $tableLines,
             fn($l) => !preg_match('/^\|[\s\-|:]+\|$/', $l)
@@ -124,37 +146,44 @@ class ExportController extends Controller
         $totalWidth = 8640;
         $cellWidth  = (int) floor($totalWidth / $numCols);
 
-        $table = $section->addTable([
-            'borderSize'  => 4,
-            'borderColor' => '1a7a4a',
-            'cellMargin'  => 100,
-        ]);
+        try {
+            $table = $section->addTable([
+                'borderSize'  => 4,
+                'borderColor' => '1a7a4a',
+                'cellMargin'  => 80,
+            ]);
 
-        foreach ($rows as $i => $row) {
-            $cells    = array_map('trim', explode('|', trim($row, '|')));
-            $isHeader = ($i === 0);
-            $bgColor  = $isHeader ? '1a7a4a' : ($i % 2 === 0 ? 'f0fdf4' : 'ffffff');
+            foreach ($rows as $i => $row) {
+                $cells    = array_map('trim', explode('|', trim($row, '|')));
+                $isHeader = ($i === 0);
+                $bgColor  = $isHeader ? '1a7a4a' : ($i % 2 === 0 ? 'f0fdf4' : 'ffffff');
 
-            $table->addRow(400);
+                $table->addRow();
 
-            foreach ($cells as $cellText) {
-                $td = $table->addCell($cellWidth, [
-                    'bgColor' => $bgColor,
-                    'valign'  => 'center',
-                ]);
-                $td->addText(
-                    $this->cleanText($cellText),
-                    [
-                        'bold'  => $isHeader,
-                        'color' => $isHeader ? 'ffffff' : '111827',
-                        'size'  => 10,
-                    ],
-                    ['alignment' => $isHeader ? Jc::CENTER : Jc::LEFT]
-                );
+                foreach ($cells as $cellText) {
+                    $clean = $this->cleanText($cellText);
+                    $td    = $table->addCell($cellWidth, ['bgColor' => $bgColor]);
+                    $td->addText(
+                        $clean !== '' ? $clean : ' ',
+                        [
+                            'bold'  => $isHeader,
+                            'color' => $isHeader ? 'ffffff' : '111827',
+                            'size'  => 10,
+                        ]
+                    );
+                }
             }
-        }
 
-        $section->addTextBreak(1);
+            $section->addTextBreak(1);
+
+        } catch (\Exception $e) {
+            // Si la tabla falla, escribir como texto
+            foreach ($rows as $row) {
+                $cells = array_map('trim', explode('|', trim($row, '|')));
+                $section->addText($this->cleanText(implode(' | ', $cells)), ['size' => 10], ['spaceAfter' => 40]);
+            }
+            $section->addTextBreak(1);
+        }
     }
 
     private function addFormattedText($run, string $text): void
