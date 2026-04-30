@@ -137,7 +137,6 @@ class ExportController extends Controller
 
     private function renderTable($section, array $tableLines): void
     {
-        // Filtrar separadores |---|
         $rows = array_values(array_filter(
             $tableLines,
             fn($l) => !preg_match('/^\|[\s\-|:]+\|$/', $l)
@@ -145,39 +144,26 @@ class ExportController extends Controller
 
         if (empty($rows)) return;
 
-        // Contar columnas desde la primera fila
-        $firstCells = array_values(array_filter(
-            array_map('trim', explode('|', trim($rows[0], '|'))),
-            fn($c) => $c !== ''
-        ));
-        $numCols = count($firstCells);
-        if ($numCols < 1) return;
-
-        $cellWidth = (int) floor(8640 / $numCols);
-
-        $table = $section->addTable();
-
         foreach ($rows as $i => $row) {
             $cells = array_values(array_filter(
                 array_map('trim', explode('|', trim($row, '|'))),
                 fn($c) => $c !== ''
             ));
 
-            while (count($cells) < $numCols) $cells[] = ' ';
-            $cells = array_slice($cells, 0, $numCols);
-
             $isHeader = ($i === 0);
+            $text = implode('  |  ', array_map([$this, 'cleanText'], $cells));
 
-            $table->addRow();
+            if ($text === '') continue;
 
-            foreach ($cells as $cellText) {
-                $clean = $this->cleanText($cellText);
-                $td    = $table->addCell($cellWidth);
-                $td->addText(
-                    $clean !== '' ? $clean : ' ',
-                    ['bold' => $isHeader, 'size' => 10]
-                );
-            }
+            $section->addText(
+                $text,
+                [
+                    'bold'  => $isHeader,
+                    'size'  => $isHeader ? 11 : 10,
+                    'color' => $isHeader ? '1a7a4a' : '111827',
+                ],
+                ['spaceAfter' => 20]
+            );
         }
 
         $section->addTextBreak(1);
