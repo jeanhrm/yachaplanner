@@ -74,23 +74,20 @@ class ExportController extends Controller
 
     private function parseMarkdownToWord($section, string $markdown): void
     {
-        $lines      = explode("\n", $markdown);
-        $tableLines = [];
-        $inTable    = false;
+        $lines = explode("\n", $markdown);
 
         foreach ($lines as $line) {
             $trimmed = trim($line);
 
+            // Tablas — escribir como texto raw sin procesar
             if (str_starts_with($trimmed, '|')) {
-                $inTable      = true;
-                $tableLines[] = $trimmed;
+                $raw = preg_replace('/[|]/', ' ', $trimmed);
+                $raw = preg_replace('/\s+/', ' ', $raw);
+                $raw = trim($raw);
+                if ($raw !== '') {
+                    $section->addText($raw, ['size' => 9, 'color' => '374151']);
+                }
                 continue;
-            }
-
-            if ($inTable) {
-                $this->renderTable($section, $tableLines);
-                $tableLines = [];
-                $inTable    = false;
             }
 
             if (empty($trimmed)) {
@@ -128,10 +125,6 @@ class ExportController extends Controller
                     $section->addText($clean, ['size' => 11], ['spaceAfter' => 60]);
                 }
             }
-        }
-
-        if ($inTable && count($tableLines) > 0) {
-            $this->renderTable($section, $tableLines);
         }
     }
 
