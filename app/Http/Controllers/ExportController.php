@@ -81,14 +81,16 @@ class ExportController extends Controller
 
             // Tablas — escribir como texto raw sin procesar
             if (str_starts_with($trimmed, '|')) {
-                $raw = preg_replace('/[|]/', ' ', $trimmed);
+                $raw = str_replace('|', ' ', $trimmed);
                 $raw = preg_replace('/\s+/', ' ', $raw);
                 $raw = trim($raw);
+                // Solo eliminar caracteres de control
+                $raw = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', '', $raw);
                 if ($raw !== '') {
-                    $section->addText($raw, ['size' => 9, 'color' => '374151']);
+                    $section->addText($raw, ['size' => 9]);
                 }
                 continue;
-            }
+            }   
 
             if (empty($trimmed)) {
                 $section->addTextBreak(1);
