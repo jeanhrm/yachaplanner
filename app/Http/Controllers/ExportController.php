@@ -74,24 +74,13 @@ class ExportController extends Controller
 
     private function parseMarkdownToWord($section, string $markdown): void
     {
-        $lines      = explode("\n", $markdown);
-        $tableLines = [];
-        $inTable    = false;
+        $lines = explode("\n", $markdown);
 
         foreach ($lines as $line) {
             $trimmed = trim($line);
 
-            if (str_starts_with($trimmed, '|')) {
-                $inTable      = true;
-                $tableLines[] = $trimmed;
-                continue;
-            }
-
-            if ($inTable) {
-                $this->renderTable($section, $tableLines);
-                $tableLines = [];
-                $inTable    = false;
-            }
+            // Saltar tablas completamente por ahora
+            if (str_starts_with($trimmed, '|')) continue;
 
             if (empty($trimmed)) {
                 $section->addTextBreak(1);
@@ -122,22 +111,15 @@ class ExportController extends Controller
                     ['size' => 11],
                     ['spaceAfter' => 40, 'indentation' => ['left' => 360]]
                 );
-            } elseif (str_starts_with($trimmed, '---')) {
-                $section->addTextBreak(1);
             } else {
-                $clean = preg_replace('/\*\*([^*]+)\*\*/', '$1', $trimmed);
-                $clean = preg_replace('/\*([^*]+)\*/', '$1', $clean);
-                $clean = $this->cleanText($clean);
+                $clean = $this->cleanText($trimmed);
                 if ($clean !== '') {
                     $section->addText($clean, ['size' => 11], ['spaceAfter' => 60]);
                 }
             }
         }
-
-        if ($inTable && count($tableLines) > 0) {
-            $this->renderTable($section, $tableLines);
-        }
     }
+    
 
     private function renderTable($section, array $tableLines): void
     {
