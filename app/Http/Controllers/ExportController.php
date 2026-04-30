@@ -19,9 +19,9 @@ class ExportController extends Controller
 
         // Obtener el último mensaje del asistente
         $lastAssistant = ChatMessage::where('session_id', $session->id)
-                                    ->where('role', 'assistant')
-                                    ->latest()
-                                    ->first();
+                            ->where('role', 'assistant')
+                            ->orderBy('id', 'desc')
+                            ->first();
 
         if (!$lastAssistant) {
             return back()->with('error', 'No hay contenido para exportar.');
