@@ -28,11 +28,28 @@ class ExportController extends Controller
 
         $phpWord = new PhpWord();
         $section = $phpWord->addSection();
-        
-        // Solo agregar una línea fija para probar
-        $section->addText('Contenido exportado correctamente.');
 
-        $filename = 'test_' . date('Ymd_His') . '.docx';
+        // Limpiar contenido agresivamente
+        $content = $lastAssistant->content;
+        
+        // Paso 1: convertir a ASCII puro eliminando todo lo demás
+        $content = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $content);
+        
+        // Paso 2: eliminar caracteres de control
+        $content = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', '', $content);
+        
+        // Paso 3: escribir línea por línea
+        $lines = explode("\n", $content);
+        foreach ($lines as $line) {
+            $line = trim($line);
+            if (empty($line)) {
+                $section->addTextBreak(1);
+                continue;
+            }
+            $section->addText($line, ['size' => 11]);
+        }
+
+        $filename = 'yachaplanner_' . date('Ymd_His') . '.docx';
         $tempPath = sys_get_temp_dir() . '/' . $filename;
 
         $writer = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'Word2007');
