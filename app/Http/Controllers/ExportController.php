@@ -29,16 +29,12 @@ class ExportController extends Controller
         $phpWord = new PhpWord();
         $section = $phpWord->addSection();
 
-        // Limpiar contenido agresivamente
         $content = $lastAssistant->content;
-        
-        // Paso 1: convertir a ASCII puro eliminando todo lo demás
-        $content = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $content);
-        
-        // Paso 2: eliminar caracteres de control
+
+        // Eliminar todo excepto letras, números, puntuación básica y saltos de línea
+        $content = preg_replace('/[^\p{L}\p{N}\p{P}\p{Z}\n\r ]/u', '', $content);
         $content = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', '', $content);
-        
-        // Paso 3: escribir línea por línea
+
         $lines = explode("\n", $content);
         foreach ($lines as $line) {
             $line = trim($line);
