@@ -150,8 +150,6 @@ class ExportController extends Controller
             'borderSize'  => 6,
             'borderColor' => '1a7a4a',
             'cellMargin'  => 80,
-            'unit'        => \PhpOffice\PhpWord\Style\Table::WIDTH_TWIP,
-            'width'       => $totalWidth,
         ];
 
         $table = $section->addTable($tableStyle);
