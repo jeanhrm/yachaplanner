@@ -9,18 +9,6 @@ class ModuleConfigSeeder extends Seeder
 {
     public function run(): void
     {
-        $aprobacion = '
-
----
-
-✅ **¿Esta propuesta se ajusta a tu realidad?**
-
-Antes de descargar el documento, dime:
-- ¿Quieres ajustar algo? (metodología, actividades, recursos, tiempos, contexto local)
-- ¿Está lista para descargar?
-
-Responde **"Aprobado"** o cuéntame qué cambiarías y lo ajustamos juntos.';
-
         $modules = [
             [
                 'slug'        => 'bimestral',
@@ -76,7 +64,9 @@ Genera una PROGRAMACIÓN BIMESTRAL completa con secciones ## usando tablas markd
 (tabla: N° | Título | Horas | Metodología | Recursos)
 
 ## ENFOQUES TRANSVERSALES
-(tabla: Enfoque | Actitudes observables)' . $aprobacion,
+(tabla: Enfoque | Actitudes observables)
+
+Al terminar di siempre: "✅ Tu programación está lista. Puedes descargarla con el botón Exportar Word. ¿Quieres ajustar algo o generar las sesiones semanales?"',
             ],
             [
                 'slug'        => 'sesion',
@@ -122,7 +112,9 @@ Genera la SESIÓN DE APRENDIZAJE con secciones ## y tablas markdown:
 (tabla: Metacognición | Evaluación | Extensión)
 
 ## EVALUACIÓN FORMATIVA
-(tabla: Criterio | En inicio | En proceso | Logro esperado | Logro destacado)' . $aprobacion,
+(tabla: Criterio | En inicio | En proceso | Logro esperado | Logro destacado)
+
+Al terminar di siempre: "✅ Tu sesión está lista. Puedes descargarla con el botón Exportar Word. ¿Quieres ajustar algo?"',
             ],
             [
                 'slug'        => 'abp',
@@ -167,7 +159,9 @@ Genera el PROYECTO STEAM/ABP con secciones ## y tablas markdown:
 ## PRODUCTO FINAL
 
 ## RÚBRICA DE ÉXITO
-(tabla: Criterio | Inicio | Proceso | Logro | Destacado)' . $aprobacion,
+(tabla: Criterio | Inicio | Proceso | Logro | Destacado)
+
+Al terminar di siempre: "✅ Tu proyecto está listo. Puedes descargarlo con el botón Exportar Word. ¿Quieres ajustar algo o generar las sesiones semanales de la primera semana?"',
             ],
             [
                 'slug'        => 'rubrica',
@@ -209,7 +203,9 @@ Genera las RÚBRICAS con secciones ## y tablas markdown:
 (tabla usando "Mi compañero/a...")
 
 ## ESCALA DE CALIFICACIÓN
-(tabla: Nivel | Descripción | Calificación AD/A/B/C)' . $aprobacion,
+(tabla: Nivel | Descripción | Calificación AD/A/B/C)
+
+Al terminar di siempre: "✅ Tu rúbrica está lista. Puedes descargarla con el botón Exportar Word. ¿Quieres ajustar algo?"',
             ],
         ];
 
