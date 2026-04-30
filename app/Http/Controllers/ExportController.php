@@ -72,9 +72,9 @@ class ExportController extends Controller
         $html    = '';
         $inTable = false;
         $tableHtml = '';
-        $inList  = false
+        $inList  = false;
 
-        foreach ($lines as $line) {
+        foreach ($lines as $line){
             $trimmed = trim($line);
 
             // Tablas
