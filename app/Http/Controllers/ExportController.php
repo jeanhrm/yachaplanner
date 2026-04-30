@@ -139,51 +139,30 @@ class ExportController extends Controller
 
         if (empty($rows)) return;
 
-        $firstCells = array_map('trim', explode('|', trim($rows[0], '|')));
-        $numCols    = count($firstCells);
-        if ($numCols < 1) return;
+        foreach ($rows as $i => $row) {
+            $cells   = array_map('trim', explode('|', trim($row, '|')));
+            $cells   = array_filter($cells, fn($c) => $c !== '');
+            $cells   = array_values($cells);
+            $isHeader = ($i === 0);
+            $text    = implode('   |   ', array_map([$this, 'cleanText'], $cells));
 
-        $totalWidth = 8640;
-        $cellWidth  = (int) floor($totalWidth / $numCols);
+            if ($text === '') continue;
 
-        try {
-            $table = $section->addTable([
-                'borderSize'  => 4,
-                'borderColor' => '1a7a4a',
-                'cellMargin'  => 80,
-            ]);
-
-            foreach ($rows as $i => $row) {
-                $cells    = array_map('trim', explode('|', trim($row, '|')));
-                $isHeader = ($i === 0);
-                $bgColor  = $isHeader ? '1a7a4a' : ($i % 2 === 0 ? 'f0fdf4' : 'ffffff');
-
-                $table->addRow();
-
-                foreach ($cells as $cellText) {
-                    $clean = $this->cleanText($cellText);
-                    $td    = $table->addCell($cellWidth, ['bgColor' => $bgColor]);
-                    $td->addText(
-                        $clean !== '' ? $clean : ' ',
-                        [
-                            'bold'  => $isHeader,
-                            'color' => $isHeader ? 'ffffff' : '111827',
-                            'size'  => 10,
-                        ]
-                    );
-                }
-            }
-
-            $section->addTextBreak(1);
-
-        } catch (\Exception $e) {
-            // Si la tabla falla, escribir como texto
-            foreach ($rows as $row) {
-                $cells = array_map('trim', explode('|', trim($row, '|')));
-                $section->addText($this->cleanText(implode(' | ', $cells)), ['size' => 10], ['spaceAfter' => 40]);
-            }
-            $section->addTextBreak(1);
+            $section->addText(
+                $text,
+                [
+                    'bold'  => $isHeader,
+                    'size'  => $isHeader ? 11 : 10,
+                    'color' => $isHeader ? '1a7a4a' : '111827',
+                ],
+                [
+                    'spaceAfter'  => $isHeader ? 40 : 20,
+                    'spaceBefore' => $isHeader ? 80 : 0,
+                ]
+            );
         }
+
+        $section->addTextBreak(1);
     }
 
     private function addFormattedText($run, string $text): void
