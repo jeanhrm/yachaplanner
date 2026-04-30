@@ -137,36 +137,8 @@ class ExportController extends Controller
 
     private function renderTable($section, array $tableLines): void
     {
-        $rows = array_values(array_filter(
-            $tableLines,
-            fn($l) => !preg_match('/^\|[\s\-|:]+\|$/', $l)
-        ));
-
-        if (empty($rows)) return;
-
-        foreach ($rows as $i => $row) {
-            $cells = array_values(array_filter(
-                array_map('trim', explode('|', trim($row, '|'))),
-                fn($c) => $c !== ''
-            ));
-
-            $isHeader = ($i === 0);
-            $text = implode('  |  ', array_map([$this, 'cleanText'], $cells));
-
-            if ($text === '') continue;
-
-            $section->addText(
-                $text,
-                [
-                    'bold'  => $isHeader,
-                    'size'  => $isHeader ? 11 : 10,
-                    'color' => $isHeader ? '1a7a4a' : '111827',
-                ],
-                ['spaceAfter' => 20]
-            );
-        }
-
-        $section->addTextBreak(1);
+        // No hacer nada por ahora
+        return;
     }
     
 }
