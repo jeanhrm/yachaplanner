@@ -78,56 +78,21 @@ class ExportController extends Controller
 
     private function parseMarkdownToWord($section, string $markdown): void
     {
-        $markdown   = $this->sanitizeContent($markdown);
-        $lines      = explode("\n", $markdown);
-        $tableLines = [];
-        $inTable    = false;
-
+        // Limpiar agresivamente todo
+        $clean = preg_replace('/[^\x20-\x7E\x0A\x0D]/u', '', $markdown);
+        
+        $lines = explode("\n", $clean);
         foreach ($lines as $line) {
-            $trimmed = trim($line);
-
-            if (str_starts_with($trimmed, '|')) {
-                $inTable      = true;
-                $tableLines[] = $trimmed;
-                continue;
-            }
-
-            if ($inTable) {
-                $this->renderTable($section, $tableLines);
-                $tableLines = [];
-                $inTable    = false;
-            }
-
-            if (empty($trimmed)) {
+            $line = trim($line);
+            if (empty($line)) {
                 $section->addTextBreak(1);
                 continue;
             }
-
-            // Headings
-            if (preg_match('/^### (.+)/', $trimmed, $m)) {
-                $section->addText($this->cleanText($m[1]), ['bold' => true, 'size' => 11, 'color' => '374151'], ['spaceAfter' => 80, 'spaceBefore' => 160]);
-            } elseif (preg_match('/^## (.+)/', $trimmed, $m)) {
-                $section->addText($this->cleanText($m[1]), ['bold' => true, 'size' => 13, 'color' => '1a7a4a'], ['spaceAfter' => 120, 'spaceBefore' => 240, 'borderBottomSize' => 4, 'borderBottomColor' => 'd1fae5']);
-            } elseif (preg_match('/^# (.+)/', $trimmed, $m)) {
-                $section->addText($this->cleanText($m[1]), ['bold' => true, 'size' => 16, 'color' => '1a7a4a'], ['spaceAfter' => 200]);
-            } elseif (preg_match('/^[-*]\s+(.+)/', $trimmed, $m)) {
-                $section->addText('• ' . $this->cleanText($m[1]), ['size' => 11], ['spaceAfter' => 40, 'indentation' => ['left' => 360]]);
-            } elseif (str_starts_with($trimmed, '---')) {
-                $section->addTextBreak(1);
-            } else {
-                $clean = preg_replace('/\*\*([^*]+)\*\*/', '$1', $trimmed);
-                $clean = preg_replace('/\*([^*]+)\*/', '$1', $clean);
-                $clean = $this->cleanText($clean);
-                if ($clean !== '') {
-                    $section->addText($clean, ['size' => 11], ['spaceAfter' => 60]);
-                }
-            }
-        }
-
-        if ($inTable && count($tableLines) > 0) {
-            $this->renderTable($section, $tableLines);
+            // Solo texto, sin ningún formato
+            $section->addText($line, ['size' => 11]);
         }
     }
+
 
     private function renderTable($section, array $tableLines): void
     {
