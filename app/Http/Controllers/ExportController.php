@@ -7,6 +7,7 @@ use App\Models\ChatMessage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use PhpOffice\PhpWord\PhpWord;
+use PhpOffice\PhpWord\SimpleType\Jc;
 
 class ExportController extends Controller
 {
@@ -26,11 +27,45 @@ class ExportController extends Controller
         }
 
         $phpWord = new PhpWord();
-        $section = $phpWord->addSection();
-        $section->addText('Prueba de exportación Word');
-        $section->addText('Sesión ID: ' . $session->id);
+        $phpWord->setDefaultFontName('Arial');
+        $phpWord->setDefaultFontSize(11);
 
-        $filename = 'test_' . date('Ymd_His') . '.docx';
+        $phpWord->addTitleStyle(1, [
+            'bold' => true, 'size' => 16, 'color' => '1a7a4a',
+        ], ['spaceAfter' => 200]);
+
+        $phpWord->addTitleStyle(2, [
+            'bold' => true, 'size' => 13, 'color' => '1a7a4a',
+        ], ['spaceAfter' => 120, 'spaceBefore' => 240]);
+
+        $phpWord->addTitleStyle(3, [
+            'bold' => true, 'size' => 11, 'color' => '374151',
+        ], ['spaceAfter' => 80, 'spaceBefore' => 160]);
+
+        $section = $phpWord->addSection([
+            'marginTop'    => 1440,
+            'marginBottom' => 1440,
+            'marginLeft'   => 1440,
+            'marginRight'  => 1440,
+        ]);
+
+        $header = $section->addHeader();
+        $header->addText(
+            'YachaPlanner — Planificación Curricular STEAM',
+            ['bold' => true, 'size' => 9, 'color' => '1a7a4a'],
+            ['alignment' => Jc::RIGHT]
+        );
+
+        $footer = $section->addFooter();
+        $footer->addText(
+            'Generado con YachaPlanner · yachaplanner-production.up.railway.app',
+            ['size' => 8, 'color' => '999999'],
+            ['alignment' => Jc::CENTER]
+        );
+
+        $this->parseMarkdownToWord($section, $lastAssistant->content);
+
+        $filename = 'yachaplanner_' . $session->module . '_' . date('Ymd_His') . '.docx';
         $tempPath = sys_get_temp_dir() . '/' . $filename;
 
         $writer = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'Word2007');
@@ -39,5 +74,146 @@ class ExportController extends Controller
         return response()->download($tempPath, $filename, [
             'Content-Type' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
         ])->deleteFileAfterSend(true);
+    }
+
+    private function parseMarkdownToWord($section, string $markdown): void
+    {
+        // Limpiar todo el contenido primero
+        $markdown = $this->sanitizeContent($markdown);
+        $lines    = explode("\n", $markdown);
+
+        $tableLines = [];
+        $inTable    = false;
+
+        foreach ($lines as $line) {
+            $trimmed = trim($line);
+
+            if (str_starts_with($trimmed, '|')) {
+                $inTable      = true;
+                $tableLines[] = $trimmed;
+                continue;
+            }
+
+            if ($inTable) {
+                $this->renderTable($section, $tableLines);
+                $tableLines = [];
+                $inTable    = false;
+            }
+
+            if (empty($trimmed)) {
+                $section->addTextBreak(1);
+                continue;
+            }
+
+            if (str_starts_with($trimmed, '### ')) {
+                $section->addTitle($this->cleanText(substr($trimmed, 4)), 3);
+            } elseif (str_starts_with($trimmed, '## ')) {
+                $section->addTitle($this->cleanText(substr($trimmed, 3)), 2);
+            } elseif (str_starts_with($trimmed, '# ')) {
+                $section->addTitle($this->cleanText(substr($trimmed, 2)), 1);
+            } elseif (preg_match('/^[-*]\s+(.+)/', $trimmed, $m)) {
+                $section->addListItem($this->cleanText($m[1]), 0, ['size' => 11]);
+            } elseif (str_starts_with($trimmed, '---')) {
+                $section->addTextBreak(1);
+            } else {
+                $run = $section->addTextRun(['spaceAfter' => 80]);
+                $this->addFormattedText($run, $trimmed);
+            }
+        }
+
+        if ($inTable && count($tableLines) > 0) {
+            $this->renderTable($section, $tableLines);
+        }
+    }
+
+    private function renderTable($section, array $tableLines): void
+    {
+        $rows = array_values(array_filter(
+            $tableLines,
+            fn($l) => !preg_match('/^\|[\s\-|:]+\|$/', $l)
+        ));
+
+        if (empty($rows)) return;
+
+        $firstCells = array_map('trim', explode('|', trim($rows[0], '|')));
+        $numCols    = count($firstCells);
+        if ($numCols < 1) return;
+
+        $totalWidth = 8640;
+        $cellWidth  = (int) floor($totalWidth / $numCols);
+
+        $table = $section->addTable([
+            'borderSize'  => 4,
+            'borderColor' => '1a7a4a',
+            'cellMargin'  => 100,
+        ]);
+
+        foreach ($rows as $i => $row) {
+            $cells    = array_map('trim', explode('|', trim($row, '|')));
+            $isHeader = ($i === 0);
+            $bgColor  = $isHeader ? '1a7a4a' : ($i % 2 === 0 ? 'f0fdf4' : 'ffffff');
+
+            $table->addRow(400);
+
+            foreach ($cells as $cellText) {
+                $td = $table->addCell($cellWidth, [
+                    'bgColor' => $bgColor,
+                    'valign'  => 'center',
+                ]);
+                $td->addText(
+                    $this->cleanText($cellText),
+                    [
+                        'bold'  => $isHeader,
+                        'color' => $isHeader ? 'ffffff' : '111827',
+                        'size'  => 10,
+                    ],
+                    ['alignment' => $isHeader ? Jc::CENTER : Jc::LEFT]
+                );
+            }
+        }
+
+        $section->addTextBreak(1);
+    }
+
+    private function addFormattedText($run, string $text): void
+    {
+        $parts = preg_split('/(\*\*[^*]+\*\*|\*[^*]+\*)/', $text, -1, PREG_SPLIT_DELIM_CAPTURE);
+        foreach ($parts as $part) {
+            if (str_starts_with($part, '**') && str_ends_with($part, '**')) {
+                $run->addText(
+                    $this->cleanText(substr($part, 2, -2)),
+                    ['bold' => true, 'size' => 11]
+                );
+            } elseif (str_starts_with($part, '*') && str_ends_with($part, '*')) {
+                $run->addText(
+                    $this->cleanText(substr($part, 1, -1)),
+                    ['italic' => true, 'size' => 11]
+                );
+            } else {
+                $cleaned = $this->cleanText($part);
+                if ($cleaned !== '') {
+                    $run->addText($cleaned, ['size' => 11]);
+                }
+            }
+        }
+    }
+
+    private function sanitizeContent(string $content): string
+    {
+        // Eliminar emojis y caracteres especiales que corrompen XML de Word
+        $content = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/u', '', $content);
+
+        // Eliminar caracteres Unicode fuera del rango básico (emojis, símbolos especiales)
+        $content = preg_replace('/[^\x09\x0A\x0D\x20-\x7E\xA0-\x{D7FF}\x{E000}-\x{FFFD}]/u', '', $content);
+
+        return $content;
+    }
+
+    private function cleanText(string $text): string
+    {
+        $text = preg_replace('/[*_`#~]/', '', $text);
+        $text = html_entity_decode($text, ENT_QUOTES, 'UTF-8');
+        $text = $this->sanitizeContent($text);
+        return trim($text);
     }
 }
