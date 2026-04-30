@@ -68,7 +68,16 @@ class ExportController extends Controller
 
     private function markdownToHtml(string $markdown): string
     {
-        $markdown = str_replace(['<br>', '<br/>', '<br />'], "\n", $markdown);
+        // Convertir <br> literales en saltos solo en líneas que NO son de tabla
+        $lines_temp = explode("\n", $markdown);
+        $markdown = implode("\n", array_map(function($line) {
+            if (str_starts_with(trim($line), '|')) {
+                // En tablas: mantener <br> como separador visual
+                return $line;
+            }
+            // Fuera de tablas: convertir a salto de línea
+            return str_replace(['<br>', '<br/>', '<br />'], "\n", $line);
+        }, $lines_temp));
     
         $lines   = explode("\n", $markdown);
         $html    = '';
