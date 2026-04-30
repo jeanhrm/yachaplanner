@@ -632,12 +632,44 @@ Tono cálido, motivador. Sin markdown — párrafo conversacional en español.`;
                 </div>`;
         }
 
-        function loadSession(id, mod) {
+        async function loadSession(id, mod) {
             currentSessionId = id;
             currentModule = mod;
             document.getElementById('current-module-name').textContent = mod;
             document.getElementById('module-label').textContent = mod;
             document.getElementById('export-btn').style.display = 'inline';
+            document.getElementById('messages').innerHTML = '';
+            showTyping();
+
+            try {
+                const res = await fetch(`/chat/session/${id}`, {
+                    headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
+                });
+                const data = await res.json();
+                removeTyping();
+
+                if (data.messages && data.messages.length > 0) {
+                    data.messages.forEach(m => {
+                        if (m.content === '__sugerencia_interna__') return;
+                        const msgs = document.getElementById('messages');
+                        const wrap = document.createElement('div');
+                        if (m.role === 'user') {
+                            wrap.className = 'msg-user';
+                            wrap.innerHTML = `<div class="bubble-user">${m.content.replace(/\n/g,'<br>')}</div>`;
+                        } else {
+                            wrap.className = 'msg-bot';
+                            wrap.innerHTML = `<div class="bot-avatar">🌱</div><div class="bubble-bot">${marked.parse(m.content)}</div>`;
+                        }
+                        msgs.appendChild(wrap);
+                    });
+                    document.getElementById('messages').scrollTop = 99999;
+                }
+            } catch(e) {
+                removeTyping();
+                document.getElementById('messages').innerHTML = '<div class="welcome-msg"><p>No se pudo cargar el historial.</p></div>';
+            }
+
+            document.getElementById('user-input').focus();
         }
 
         function handleKey(e) {

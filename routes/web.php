@@ -23,6 +23,15 @@ Route::middleware('auth')->group(function () {
     Route::get('/chat', [ChatController::class, 'index'])->name('chat.index');
     Route::post('/chat', [ChatController::class, 'store'])->name('chat.store');
 
+    // Historial de sesión
+    Route::get('/chat/session/{session}', function(\App\Models\ChatSession $session) {
+        if ($session->user_id !== auth()->id()) abort(403);
+        $messages = \App\Models\ChatMessage::where('session_id', $session->id)
+                    ->orderBy('created_at')
+                    ->get(['role','content']);
+        return response()->json(['messages' => $messages]);
+    })->name('chat.session');
+
     Route::get('/export/word/{session}', [ExportController::class, 'word'])->name('export.word');
     Route::get('/creditos', [CreditsController::class, 'index'])->name('credits.index');
 });
