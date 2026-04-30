@@ -17,11 +17,10 @@ class ExportController extends Controller
             abort(403);
         }
 
-        // Obtener el último mensaje del asistente
         $lastAssistant = ChatMessage::where('session_id', $session->id)
-                            ->where('role', 'assistant')
-                            ->orderBy('id', 'desc')
-                            ->first();
+                                    ->where('role', 'assistant')
+                                    ->orderBy('id', 'desc')
+                                    ->first();
 
         if (!$lastAssistant) {
             return back()->with('error', 'No hay contenido para exportar.');
@@ -34,38 +33,39 @@ class ExportController extends Controller
         $phpWord->setDefaultFontSize(11);
 
         $phpWord->addTitleStyle(1, [
-            'bold' => true, 'size' => 14, 'color' => '1a7a4a',
-        ], ['spaceAfter' => 120]);
+            'bold' => true, 'size' => 16, 'color' => '1a7a4a',
+        ], ['spaceAfter' => 200, 'spaceBefore' => 100]);
 
         $phpWord->addTitleStyle(2, [
-            'bold' => true, 'size' => 12, 'color' => '1a7a4a',
-        ], ['spaceAfter' => 80, 'spaceBefore' => 160]);
+            'bold' => true, 'size' => 13, 'color' => '1a7a4a',
+        ], ['spaceAfter' => 120, 'spaceBefore' => 240]);
 
         $phpWord->addTitleStyle(3, [
-            'bold' => true, 'size' => 11, 'color' => '333333',
-        ], ['spaceAfter' => 60, 'spaceBefore' => 120]);
+            'bold' => true, 'size' => 11, 'color' => '374151',
+        ], ['spaceAfter' => 80, 'spaceBefore' => 160]);
 
         $section = $phpWord->addSection([
-            'marginTop'    => 1080,
-            'marginBottom' => 1080,
-            'marginLeft'   => 1080,
-            'marginRight'  => 1080,
+            'marginTop'    => 1440,
+            'marginBottom' => 1440,
+            'marginLeft'   => 1440,
+            'marginRight'  => 1440,
         ]);
 
         // Header
         $header = $section->addHeader();
-        $headerTable = $header->addTable(['borderSize' => 0, 'cellMargin' => 50]);
-        $headerTable->addRow();
-        $cell = $headerTable->addCell(9000);
-        $cell->addText('YachaPlanner — Planificación Curricular STEAM', [
-            'bold' => true, 'size' => 9, 'color' => '1a7a4a'
-        ], ['alignment' => Jc::RIGHT]);
+        $header->addText(
+            'YachaPlanner — Planificación Curricular STEAM',
+            ['bold' => true, 'size' => 9, 'color' => '1a7a4a'],
+            ['alignment' => Jc::RIGHT]
+        );
 
         // Footer
         $footer = $section->addFooter();
-        $footer->addText('Generado con YachaPlanner · yachaplanner-production.up.railway.app', [
-            'size' => 8, 'color' => '999999'
-        ], ['alignment' => Jc::CENTER]);
+        $footer->addText(
+            'Generado con YachaPlanner · yachaplanner-production.up.railway.app',
+            ['size' => 8, 'color' => '999999'],
+            ['alignment' => Jc::CENTER]
+        );
 
         $this->parseMarkdownToWord($section, $content);
 
@@ -89,7 +89,7 @@ class ExportController extends Controller
         foreach ($lines as $line) {
             $trimmed = trim($line);
 
-            // Acumular líneas de tabla
+            // Acumular tabla
             if (str_starts_with($trimmed, '|')) {
                 $inTable = true;
                 $tableLines[] = $trimmed;
@@ -116,13 +116,14 @@ class ExportController extends Controller
                 $section->addTitle($this->cleanText(substr($trimmed, 2)), 1);
             } elseif (preg_match('/^[-*]\s+(.+)/', $trimmed, $m)) {
                 $section->addListItem($this->cleanText($m[1]), 0, ['size' => 11]);
+            } elseif (str_starts_with($trimmed, '---')) {
+                $section->addTextBreak(1);
             } else {
-                $paragraph = $section->addTextRun(['spaceAfter' => 60]);
-                $this->addFormattedText($paragraph, $trimmed);
+                $run = $section->addTextRun(['spaceAfter' => 80]);
+                $this->addFormattedText($run, $trimmed);
             }
         }
 
-        // Tabla al final del documento
         if ($inTable && count($tableLines) > 0) {
             $this->renderTable($section, $tableLines);
         }
@@ -130,7 +131,7 @@ class ExportController extends Controller
 
     private function renderTable($section, array $tableLines): void
     {
-        // Filtrar línea separadora |---|---|
+        // Filtrar separadores |---|
         $rows = array_values(array_filter(
             $tableLines,
             fn($l) => !preg_match('/^\|[\s\-|:]+\|$/', $l)
@@ -138,38 +139,40 @@ class ExportController extends Controller
 
         if (empty($rows)) return;
 
-        // Calcular número de columnas
+        // Calcular columnas
         $firstCells = array_map('trim', explode('|', trim($rows[0], '|')));
         $numCols    = count($firstCells);
+        if ($numCols < 1) return;
 
-        // Ancho total disponible en twips (9000 = ~15.24cm)
-        $totalWidth = 9000;
-        $cellWidth  = (int) floor($totalWidth / max($numCols, 1));
+        $totalWidth = 8640; // twips (~15cm)
+        $cellWidth  = (int) floor($totalWidth / $numCols);
 
-        $tableStyle = [
-            'borderSize'  => 6,
+        $table = $section->addTable([
+            'borderSize'  => 4,
             'borderColor' => '1a7a4a',
-            'cellMargin'  => 80,
-        ];
-
-        $table = $section->addTable($tableStyle);
+            'cellMargin'  => 100,
+        ]);
 
         foreach ($rows as $i => $row) {
             $cells    = array_map('trim', explode('|', trim($row, '|')));
-            $isHeader = $i === 0;
+            $isHeader = ($i === 0);
+            $bgColor  = $isHeader ? '1a7a4a' : ($i % 2 === 0 ? 'f0fdf4' : 'ffffff');
 
-            $table->addRow();
+            $table->addRow(400);
 
-            foreach ($cells as $cell) {
-                $bgColor = $isHeader ? '1a7a4a' : ($i % 2 === 0 ? 'f0fdf4' : 'ffffff');
-                $td = $table->addCell($cellWidth, ['bgColor' => $bgColor]);
+            foreach ($cells as $cellText) {
+                $td = $table->addCell($cellWidth, [
+                    'bgColor' => $bgColor,
+                    'valign'  => 'center',
+                ]);
                 $td->addText(
-                    $this->cleanText($cell),
+                    $this->cleanText($cellText),
                     [
                         'bold'  => $isHeader,
                         'color' => $isHeader ? 'ffffff' : '111827',
                         'size'  => 10,
-                    ]
+                    ],
+                    ['alignment' => $isHeader ? Jc::CENTER : Jc::LEFT]
                 );
             }
         }
@@ -177,24 +180,36 @@ class ExportController extends Controller
         $section->addTextBreak(1);
     }
 
-    private function addFormattedText($paragraph, string $text): void
+    private function addFormattedText($run, string $text): void
     {
         $parts = preg_split('/(\*\*[^*]+\*\*|\*[^*]+\*)/', $text, -1, PREG_SPLIT_DELIM_CAPTURE);
         foreach ($parts as $part) {
             if (str_starts_with($part, '**') && str_ends_with($part, '**')) {
-                $paragraph->addText($this->cleanText(substr($part, 2, -2)), ['bold' => true, 'size' => 11]);
+                $run->addText(
+                    $this->cleanText(substr($part, 2, -2)),
+                    ['bold' => true, 'size' => 11]
+                );
             } elseif (str_starts_with($part, '*') && str_ends_with($part, '*')) {
-                $paragraph->addText($this->cleanText(substr($part, 1, -1)), ['italic' => true, 'size' => 11]);
+                $run->addText(
+                    $this->cleanText(substr($part, 1, -1)),
+                    ['italic' => true, 'size' => 11]
+                );
             } else {
-                $paragraph->addText($this->cleanText($part), ['size' => 11]);
+                if (trim($part) !== '') {
+                    $run->addText(
+                        $this->cleanText($part),
+                        ['size' => 11]
+                    );
+                }
             }
         }
     }
 
     private function cleanText(string $text): string
     {
-        $text = preg_replace('/[*_`#]/', '', $text);
+        $text = preg_replace('/[*_`#~]/', '', $text);
         $text = html_entity_decode($text, ENT_QUOTES, 'UTF-8');
+        $text = preg_replace('/[^\x09\x0A\x0D\x20-\x{FFFD}]/u', '', $text);
         return trim($text);
     }
 }
