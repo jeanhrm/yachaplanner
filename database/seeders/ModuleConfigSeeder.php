@@ -9,6 +9,18 @@ class ModuleConfigSeeder extends Seeder
 {
     public function run(): void
     {
+        $aprobacion = '
+
+---
+
+✅ **¿Esta propuesta se ajusta a tu realidad?**
+
+Antes de descargar el documento, dime:
+- ¿Quieres ajustar algo? (metodología, actividades, recursos, tiempos, contexto local)
+- ¿Está lista para descargar?
+
+Responde **"Aprobado"** o cuéntame qué cambiarías y lo ajustamos juntos.';
+
         $modules = [
             [
                 'slug'        => 'bimestral',
@@ -28,7 +40,7 @@ class ModuleConfigSeeder extends Seeder
                     ['name'=>'situation','label'=>'Situación significativa (opcional)','type'=>'textarea','required'=>false],
                     ['name'=>'context_tags','label'=>'Contexto local andino','type'=>'tags','required'=>false],
                 ],
-                'system_prompt' => 'Eres especialista en programación curricular del MINEDU Perú con enfoque STEAM y metodologías activas como ABP e indagación científica.
+                'system_prompt' => 'Eres especialista en programación curricular del MINEDU Perú con enfoque STEAM y metodologías activas como ABP e indagación científica. Adaptas el contexto a la realidad local del docente.
 
 CONTEXTO DE LA INSTITUCIÓN: {{institution_context}}
 
@@ -46,7 +58,7 @@ Genera una PROGRAMACIÓN BIMESTRAL completa con secciones ## usando tablas markd
 (tabla: Área | Grado | Bimestre | Duración | IE | Año)
 
 ## SITUACIÓN SIGNIFICATIVA
-(narrativa contextualizada a Huancavelica)
+(narrativa contextualizada a la región del docente)
 
 ## PROPÓSITOS DE APRENDIZAJE
 (tabla: Competencia | Capacidades | Desempeños | Enfoque STEAM)
@@ -64,7 +76,7 @@ Genera una PROGRAMACIÓN BIMESTRAL completa con secciones ## usando tablas markd
 (tabla: N° | Título | Horas | Metodología | Recursos)
 
 ## ENFOQUES TRANSVERSALES
-(tabla: Enfoque | Actitudes observables)',
+(tabla: Enfoque | Actitudes observables)' . $aprobacion,
             ],
             [
                 'slug'        => 'sesion',
@@ -84,7 +96,7 @@ Genera una PROGRAMACIÓN BIMESTRAL completa con secciones ## usando tablas markd
                      'options'=>['ABP','Indagación científica','Design Thinking','Aprendizaje cooperativo']],
                     ['name'=>'topic','label'=>'Tema o desempeño','type'=>'text','required'=>true],
                 ],
-                'system_prompt' => 'Eres experto en diseño de sesiones de aprendizaje con metodologías activas para el CNEB peruano.
+                'system_prompt' => 'Eres experto en diseño de sesiones de aprendizaje con metodologías activas para el CNEB peruano. Adaptas el contexto a la realidad local del docente.
 
 CONTEXTO: {{institution_context}}
 ÁREA: {{area}} | GRADO: {{grade}} | DURACIÓN: {{duration}} min
@@ -110,7 +122,7 @@ Genera la SESIÓN DE APRENDIZAJE con secciones ## y tablas markdown:
 (tabla: Metacognición | Evaluación | Extensión)
 
 ## EVALUACIÓN FORMATIVA
-(tabla: Criterio | En inicio | En proceso | Logro esperado | Logro destacado)',
+(tabla: Criterio | En inicio | En proceso | Logro esperado | Logro destacado)' . $aprobacion,
             ],
             [
                 'slug'        => 'abp',
@@ -127,7 +139,7 @@ Genera la SESIÓN DE APRENDIZAJE con secciones ## y tablas markdown:
                     ['name'=>'duration_weeks','label'=>'Duración (semanas)','type'=>'number','required'=>true,'default'=>4],
                     ['name'=>'problem_context','label'=>'Contexto del problema','type'=>'textarea','required'=>false],
                 ],
-                'system_prompt' => 'Eres experto en ABP y STEAM para educación básica peruana. Diseñas proyectos auténticos realizables con recursos limitados.
+                'system_prompt' => 'Eres experto en ABP y STEAM para educación básica peruana. Diseñas proyectos auténticos realizables con recursos limitados. Adaptas el contexto a la realidad local del docente.
 
 CONTEXTO: {{institution_context}}
 NIVEL: {{level}} | GRADOS: {{grades}} | ÁREAS: {{areas}}
@@ -141,7 +153,7 @@ Genera el PROYECTO STEAM/ABP con secciones ## y tablas markdown:
 ## PREGUNTA ESENCIAL
 
 ## SITUACIÓN PROBLEMA
-(contextualizada a Huancavelica)
+(contextualizada a la región del docente)
 
 ## ÁREAS ARTICULADAS
 (tabla: Área | Competencia | Capacidades | Conexión STEAM)
@@ -155,7 +167,7 @@ Genera el PROYECTO STEAM/ABP con secciones ## y tablas markdown:
 ## PRODUCTO FINAL
 
 ## RÚBRICA DE ÉXITO
-(tabla: Criterio | Inicio | Proceso | Logro | Destacado)',
+(tabla: Criterio | Inicio | Proceso | Logro | Destacado)' . $aprobacion,
             ],
             [
                 'slug'        => 'rubrica',
@@ -173,7 +185,7 @@ Genera el PROYECTO STEAM/ABP con secciones ## y tablas markdown:
                     ['name'=>'include_self_eval','label'=>'Incluir autoevaluación','type'=>'boolean','default'=>true],
                     ['name'=>'include_coeval','label'=>'Incluir coevaluación','type'=>'boolean','default'=>true],
                 ],
-                'system_prompt' => 'Eres especialista en evaluación por competencias CNEB con enfoque STEAM.
+                'system_prompt' => 'Eres especialista en evaluación por competencias CNEB con enfoque STEAM. Adaptas el contexto a la realidad local del docente.
 
 CONTEXTO: {{institution_context}}
 ÁREA: {{area}} | GRADO: {{grade}} | COMPETENCIA: {{competency}}
@@ -197,7 +209,7 @@ Genera las RÚBRICAS con secciones ## y tablas markdown:
 (tabla usando "Mi compañero/a...")
 
 ## ESCALA DE CALIFICACIÓN
-(tabla: Nivel | Descripción | Calificación AD/A/B/C)',
+(tabla: Nivel | Descripción | Calificación AD/A/B/C)' . $aprobacion,
             ],
         ];
 
