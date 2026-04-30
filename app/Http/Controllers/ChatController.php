@@ -7,7 +7,6 @@ use App\Models\ChatMessage;
 use App\Models\ModuleConfig;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Http;
 
 class ChatController extends Controller
 {
@@ -43,35 +42,33 @@ class ChatController extends Controller
         }
 
         if (!$user->hasCredits()) {
-            return response()->json(['error' => 'No tienes créditos disponibles esta semana'], 429);
+            return response()->json(['error' => 'No tienes créditos disponibles'], 429);
         }
 
-        // Obtener o crear sesión
-
+        // Declarar ANTES de todo
         $esInterna = $request->boolean('_es_sugerencia');
+
+        // Obtener o crear sesión
         if ($request->session_id) {
             $session = ChatSession::where('id', $request->session_id)
-                                ->where('user_id', $user->id)
-                                ->firstOrFail();
+                                  ->where('user_id', $user->id)
+                                  ->firstOrFail();
         } else {
             $session = ChatSession::create([
                 'user_id'               => $user->id,
                 'module'                => $request->module,
-                'title'                 => $esInterna ? 'Nueva sesión' :substr($request->message, 0, 60),
+                'title'                 => $esInterna ? 'Nueva sesión' : substr($request->message, 0, 60),
                 'system_prompt_version' => $module->version,
                 'injected_context'      => [
-                    'institution'   => $user->institution?->name ?? 'IE de Huancavelica',
-                    'ugel'          => $user->ugel?->name ?? 'UGEL Huancavelica',
-                    'local_context' => $user->institution?->local_context ?? '',
+                    'institution'   => $user->institution?->name ?? 'IE de ' . ($user->region ?? 'Perú'),
+                    'ugel'          => $user->ugel ?? 'UGEL no especificada',
+                    'local_context' => $user->region ?? 'Perú',
                 ],
                 'status' => 'active',
             ]);
         }
 
         // Guardar mensaje del usuario
-        // Si es sugerencia interna no guardamos el prompt largo
-        
-
         ChatMessage::create([
             'session_id' => $session->id,
             'user_id'    => $user->id,
@@ -86,7 +83,7 @@ class ChatController extends Controller
                           ->map(fn($m) => [
                               'role'    => $m->role,
                               'content' => $m->content === '__sugerencia_interna__'
-                                  ? $request->message // usamos el real para contexto de Claude
+                                  ? $request->message
                                   : mb_substr($m->content, 0, 2000),
                           ])
                           ->toArray();
@@ -104,19 +101,9 @@ class ChatController extends Controller
             $history = [['role' => 'user', 'content' => $request->message]];
         }
 
-        // Claude requiere que el historial empiece siempre con 'user'
-        while (!empty($history) && $history[0]['role'] !== 'user') {
-            array_shift($history);
-        }
-
-        // Si el historial quedó vacío agregar el mensaje actual
-        if (empty($history)) {
-            $history = [['role' => 'user', 'content' => $request->message]];
-        }
-
         // Construir system prompt
         $context = [
-            'institution_context' => $session->injected_context['institution'] ?? 'IE de Huancavelica',
+            'institution_context' => $session->injected_context['institution'] ?? 'IE de ' . ($user->region ?? 'Perú'),
             'area'             => $request->area ?? '',
             'grade'            => $request->grade ?? '',
             'bimester'         => $request->bimester ?? '',
@@ -151,51 +138,51 @@ class ChatController extends Controller
         ]);
 
         return response()->stream(function () use (
-            $apiKey, $payload, $sessionId, $userId, $modelName, $user, $session
+            $apiKey, $payload, $sessionId, $userId, $modelName, $user, $session, $esInterna
         ) {
-            $fullReply  = '';
-            $tokensIn   = 0;
-            $tokensOut  = 0;
-            $start      = microtime(true);
+            $fullReply = '';
+            $tokensIn  = 0;
+            $tokensOut = 0;
+            $start     = microtime(true);
 
             $ch = curl_init('https://api.anthropic.com/v1/messages');
             curl_setopt_array($ch, [
-                CURLOPT_POST           => true,
-                CURLOPT_HTTPHEADER     => [
+                CURLOPT_POST          => true,
+                CURLOPT_HTTPHEADER    => [
                     'Content-Type: application/json',
                     'x-api-key: ' . $apiKey,
                     'anthropic-version: 2023-06-01',
                 ],
-                CURLOPT_POSTFIELDS     => $payload,
-                CURLOPT_WRITEFUNCTION  => function ($ch, $data) use (&$fullReply) {
+                CURLOPT_POSTFIELDS    => $payload,
+                CURLOPT_WRITEFUNCTION => function ($ch, $data) use (&$fullReply) {
                     $lines = explode("\n", $data);
                     foreach ($lines as $line) {
                         $line = trim($line);
-                        if (str_starts_with($line, 'data: ')) {
-                            $json = substr($line, 6);
-                            if ($json === '[DONE]') continue;
-                            $event = json_decode($json, true);
-                            if (!$event) continue;
-                            if (($event['type'] ?? '') === 'content_block_delta') {
-                                $chunk = $event['delta']['text'] ?? '';
-                                if ($chunk !== '') {
-                                    $fullReply .= $chunk;
-                                    echo 'data: ' . json_encode(['chunk' => $chunk]) . "\n\n";
-                                    if (ob_get_level()) ob_flush();
-                                    flush();
-                                }
+                        if (!str_starts_with($line, 'data: ')) continue;
+                        $json = substr($line, 6);
+                        if ($json === '[DONE]') continue;
+                        $event = json_decode($json, true);
+                        if (!$event) continue;
+
+                        if (($event['type'] ?? '') === 'message_start') {
+                            $tokensIn = $event['message']['usage']['input_tokens'] ?? 0;
+                        }
+                        if (($event['type'] ?? '') === 'content_block_delta') {
+                            $chunk = $event['delta']['text'] ?? '';
+                            if ($chunk !== '') {
+                                $fullReply .= $chunk;
+                                echo 'data: ' . json_encode(['chunk' => $chunk]) . "\n\n";
+                                if (ob_get_level()) ob_flush();
+                                flush();
                             }
-                            if (($event['type'] ?? '') === 'message_delta') {
-                                $tokensOut = $event['usage']['output_tokens'] ?? 0;
-                            }
-                            if (($event['type'] ?? '') === 'message_start') {
-                                $tokensIn = $event['message']['usage']['input_tokens'] ?? 0;
-                            }
+                        }
+                        if (($event['type'] ?? '') === 'message_delta') {
+                            $tokensOut = $event['usage']['output_tokens'] ?? 0;
                         }
                     }
                     return strlen($data);
                 },
-                CURLOPT_TIMEOUT        => 120,
+                CURLOPT_TIMEOUT => 120,
             ]);
 
             curl_exec($ch);
@@ -203,7 +190,7 @@ class ChatController extends Controller
 
             $latency = max(0, (int) round((microtime(true) - $start) * 1000));
 
-            // Guardar respuesta
+            // Guardar respuesta del asistente
             ChatMessage::create([
                 'session_id'    => $sessionId,
                 'user_id'       => $userId,
@@ -215,23 +202,29 @@ class ChatController extends Controller
                 'model_used'    => $modelName,
             ]);
 
-            $user->increment('weekly_credits_used');
+            // Solo descontar crédito si NO es sugerencia interna
+            if (!$esInterna) {
+                $user->increment('weekly_credits_used');
+            }
+
             $session->increment('total_tokens_used', $tokensIn + $tokensOut);
             $session->increment('messages_count');
             $session->update(['last_message_at' => now()]);
 
             $remaining = $user->remainingCredits();
+
             echo 'data: ' . json_encode([
-                'done'             => true,
-                'session_id'       => $sessionId,
-                'credits_remaining'=> $remaining,
+                'done'              => true,
+                'session_id'        => $sessionId,
+                'credits_remaining' => $remaining,
             ]) . "\n\n";
+
             if (ob_get_level()) ob_flush();
             flush();
 
         }, 200, [
-            'Content-Type'  => 'text/event-stream',
-            'Cache-Control' => 'no-cache',
+            'Content-Type'      => 'text/event-stream',
+            'Cache-Control'     => 'no-cache',
             'X-Accel-Buffering' => 'no',
         ]);
     }

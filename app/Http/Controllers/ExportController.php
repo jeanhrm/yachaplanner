@@ -8,7 +8,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use PhpOffice\PhpWord\PhpWord;
 use PhpOffice\PhpWord\SimpleType\Jc;
-use PhpOffice\PhpWord\Style\Table;
 
 class ExportController extends Controller
 {
@@ -31,7 +30,6 @@ class ExportController extends Controller
         $content = $lastAssistant->content;
         $phpWord  = new PhpWord();
 
-        // Estilos globales
         $phpWord->setDefaultFontName('Arial');
         $phpWord->setDefaultFontSize(11);
 
@@ -69,10 +67,8 @@ class ExportController extends Controller
             'size' => 8, 'color' => '999999'
         ], ['alignment' => Jc::CENTER]);
 
-        // Parsear markdown y escribir en Word
         $this->parseMarkdownToWord($section, $content);
 
-        // Generar archivo
         $filename = 'yachaplanner_' . $session->module . '_' . date('Ymd_His') . '.docx';
         $tempPath = sys_get_temp_dir() . '/' . $filename;
 
@@ -86,14 +82,14 @@ class ExportController extends Controller
 
     private function parseMarkdownToWord($section, string $markdown): void
     {
-        $lines = explode("\n", $markdown);
+        $lines      = explode("\n", $markdown);
         $tableLines = [];
-        $inTable = false;
+        $inTable    = false;
 
         foreach ($lines as $line) {
             $trimmed = trim($line);
 
-            // Detectar tablas
+            // Acumular líneas de tabla
             if (str_starts_with($trimmed, '|')) {
                 $inTable = true;
                 $tableLines[] = $trimmed;
@@ -101,10 +97,10 @@ class ExportController extends Controller
             }
 
             // Fin de tabla
-            if ($inTable && !str_starts_with($trimmed, '|')) {
+            if ($inTable) {
                 $this->renderTable($section, $tableLines);
                 $tableLines = [];
-                $inTable = false;
+                $inTable    = false;
             }
 
             if (empty($trimmed)) {
@@ -112,28 +108,21 @@ class ExportController extends Controller
                 continue;
             }
 
-            // Headings
             if (str_starts_with($trimmed, '### ')) {
                 $section->addTitle($this->cleanText(substr($trimmed, 4)), 3);
             } elseif (str_starts_with($trimmed, '## ')) {
                 $section->addTitle($this->cleanText(substr($trimmed, 3)), 2);
             } elseif (str_starts_with($trimmed, '# ')) {
                 $section->addTitle($this->cleanText(substr($trimmed, 2)), 1);
-            }
-            // Lista con guión o asterisco
-            elseif (preg_match('/^[-*]\s+(.+)/', $trimmed, $m)) {
-                $section->addListItem($this->cleanText($m[1]), 0, [
-                    'size' => 11
-                ]);
-            }
-            // Texto normal
-            else {
+            } elseif (preg_match('/^[-*]\s+(.+)/', $trimmed, $m)) {
+                $section->addListItem($this->cleanText($m[1]), 0, ['size' => 11]);
+            } else {
                 $paragraph = $section->addTextRun(['spaceAfter' => 60]);
                 $this->addFormattedText($paragraph, $trimmed);
             }
         }
 
-        // Tabla al final si quedó
+        // Tabla al final del documento
         if ($inTable && count($tableLines) > 0) {
             $this->renderTable($section, $tableLines);
         }
@@ -142,32 +131,48 @@ class ExportController extends Controller
     private function renderTable($section, array $tableLines): void
     {
         // Filtrar línea separadora |---|---|
-        $rows = array_filter($tableLines, fn($l) => !preg_match('/^\|[\s\-|:]+\|$/', $l));
-        $rows = array_values($rows);
+        $rows = array_values(array_filter(
+            $tableLines,
+            fn($l) => !preg_match('/^\|[\s\-|:]+\|$/', $l)
+        ));
 
         if (empty($rows)) return;
+
+        // Calcular número de columnas
+        $firstCells = array_map('trim', explode('|', trim($rows[0], '|')));
+        $numCols    = count($firstCells);
+
+        // Ancho total disponible en twips (9000 = ~15.24cm)
+        $totalWidth = 9000;
+        $cellWidth  = (int) floor($totalWidth / max($numCols, 1));
 
         $tableStyle = [
             'borderSize'  => 6,
             'borderColor' => '1a7a4a',
             'cellMargin'  => 80,
+            'unit'        => \PhpOffice\PhpWord\Style\Table::WIDTH_TWIP,
+            'width'       => $totalWidth,
         ];
 
         $table = $section->addTable($tableStyle);
 
         foreach ($rows as $i => $row) {
-            $cells = array_map('trim', explode('|', trim($row, '|')));
+            $cells    = array_map('trim', explode('|', trim($row, '|')));
+            $isHeader = $i === 0;
+
             $table->addRow();
+
             foreach ($cells as $cell) {
-                $isHeader = $i === 0;
-                $td = $table->addCell(null, [
-                    'bgColor' => $isHeader ? '1a7a4a' : ($i % 2 === 0 ? 'f0fdf4' : 'ffffff'),
-                ]);
-                $td->addText($this->cleanText($cell), [
-                    'bold'  => $isHeader,
-                    'color' => $isHeader ? 'ffffff' : '111827',
-                    'size'  => 10,
-                ]);
+                $bgColor = $isHeader ? '1a7a4a' : ($i % 2 === 0 ? 'f0fdf4' : 'ffffff');
+                $td = $table->addCell($cellWidth, ['bgColor' => $bgColor]);
+                $td->addText(
+                    $this->cleanText($cell),
+                    [
+                        'bold'  => $isHeader,
+                        'color' => $isHeader ? 'ffffff' : '111827',
+                        'size'  => 10,
+                    ]
+                );
             }
         }
 
@@ -176,7 +181,6 @@ class ExportController extends Controller
 
     private function addFormattedText($paragraph, string $text): void
     {
-        // Procesar **bold** e *italic*
         $parts = preg_split('/(\*\*[^*]+\*\*|\*[^*]+\*)/', $text, -1, PREG_SPLIT_DELIM_CAPTURE);
         foreach ($parts as $part) {
             if (str_starts_with($part, '**') && str_ends_with($part, '**')) {
@@ -191,7 +195,6 @@ class ExportController extends Controller
 
     private function cleanText(string $text): string
     {
-        // Remover markdown residual y caracteres problemáticos
         $text = preg_replace('/[*_`#]/', '', $text);
         $text = html_entity_decode($text, ENT_QUOTES, 'UTF-8');
         return trim($text);
