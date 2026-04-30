@@ -98,10 +98,9 @@ class User extends Authenticatable
 
     public function remainingCredits(): int
     {
-        $limit = match($this->plan ?? 'free') {
-        'pro', 'institution' => 999,
-        default => 5,
+        return match($this->plan ?? 'free') {
+            'pro', 'institution' => 999,
+            default => max(0, 5 - $this->weekly_credits_used),
         };
-        return max(0, $limit - $this->weekly_credits_used);
     }
 }

@@ -263,7 +263,7 @@
             <div class="credits-status-left">
                 <h3>Créditos disponibles esta semana</h3>
                 <div class="credit-num">{{ $user->remainingCredits() }}</div>
-                <div class="credit-label">de 5 créditos semanales (plan gratuito)</div>
+                <div class="credit-label">de 5 créditos de prueba (plan gratuito)</div>
             </div>
             <div class="credits-status-right">
                 <div class="plan-name">Plan Gratuito</div>

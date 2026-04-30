@@ -47,6 +47,8 @@ class ChatController extends Controller
         }
 
         // Obtener o crear sesión
+
+        $esInterna = $request->boolean('_es_sugerencia');
         if ($request->session_id) {
             $session = ChatSession::where('id', $request->session_id)
                                 ->where('user_id', $user->id)
@@ -68,7 +70,7 @@ class ChatController extends Controller
 
         // Guardar mensaje del usuario
         // Si es sugerencia interna no guardamos el prompt largo
-        $esInterna = $request->boolean('_es_sugerencia');
+        
 
         ChatMessage::create([
             'session_id' => $session->id,
