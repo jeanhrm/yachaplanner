@@ -320,7 +320,7 @@
     <div class="left-content">
         <div class="left-logo">🌱</div>
         <h1 class="left-title">YachaPlanner</h1>
-        <p class="left-subtitle">Planificaciones STEAM en minutos,<br>con contexto andino real</p>
+        <p class="left-subtitle">Planificaciones innovadora en minutos,<br>adaptadas a tu realidad local</p>
 
         <div class="feature-list">
             <div class="feature-item">
@@ -333,8 +333,8 @@
             <div class="feature-item">
                 <span class="feature-icon">🏔️</span>
                 <div class="feature-text">
-                    <h4>Contexto huancavelicano</h4>
-                    <p>Papa nativa, río Ichu, quechua, heladas</p>
+                    <h4>Contexto regionales</h4>
+                    <p>Papa nativa, ríos, quechua, heladas, fenómeno del niño, sequias, incendios</p>
                 </div>
             </div>
             <div class="feature-item">
@@ -403,22 +403,22 @@
         </form>
 
         <div class="stats-row">
-            <div class="stat-item">
-                <div class="stat-num">7</div>
-                <div class="stat-label">UGELs</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-num">4</div>
-                <div class="stat-label">Módulos</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-num">∞</div>
-                <div class="stat-label">Contextos</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-num">Word</div>
-                <div class="stat-label">Exportación</div>
-            </div>
+        <div class="stat-item">
+            <div class="stat-num">25</div>
+            <div class="stat-label">Regiones</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-num">4</div>
+            <div class="stat-label">Módulos</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-num">∞</div>
+            <div class="stat-label">Contextos</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-num">Word</div>
+            <div class="stat-label">Exportación</div>
+        </div>
         </div>
     </div>
 </div>
