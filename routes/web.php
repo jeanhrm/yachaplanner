@@ -6,6 +6,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\CreditsController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\ProjectIdeaController;
+use App\Http\Controllers\SteamJourneyController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -32,8 +34,20 @@ Route::middleware('auth')->group(function () {
         return response()->json(['messages' => $messages]);
     })->name('chat.session');
 
+    // Ideas STEAM — create ANTES de show
+    Route::get('/ideas', [ProjectIdeaController::class, 'index'])->name('ideas.index');
+    Route::get('/ideas/create', function() {
+        return view('ideas.create');
+    })->name('ideas.create');
+    Route::get('/ideas/{idea}', [ProjectIdeaController::class, 'show'])->name('ideas.show');
+    Route::post('/ideas', [ProjectIdeaController::class, 'store'])->name('ideas.store');
+
     Route::get('/export/word/{session}', [ExportController::class, 'word'])->name('export.word');
     Route::get('/creditos', [CreditsController::class, 'index'])->name('credits.index');
+
+    Route::get('/ruta-steam', [SteamJourneyController::class, 'index'])->name('journey.index');
+    Route::post('/ruta-steam/avanzar', [SteamJourneyController::class, 'advance'])->name('journey.advance');
+    Route::post('/ruta-steam/reiniciar', [SteamJourneyController::class, 'reset'])->name('journey.reset');
 });
 
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {

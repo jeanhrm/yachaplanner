@@ -245,8 +245,8 @@
             <a href="{{ route('chat.index') }}" class="yp-nav-link {{ request()->routeIs('chat.*') ? 'active' : '' }}">
                 ✍️ Planificador
             </a>
-            <a href="{{ route('credits.index') }}" class="yp-nav-link {{ request()->routeIs('credits.*') ? 'active' : '' }}">
-                ⚡ Más Créditos
+            <a href="{{ route('journey.index') }}" class="yp-nav-link {{ request()->routeIs('journey.*') ? 'active' : '' }}">
+                🌱 Mi Ruta
             </a>
             @if(in_array(auth()->user()->email, ['jean@quipubit.com','ventas@quipubit.com']))
             <a href="{{ route('admin.index') }}" class="yp-nav-link {{ request()->routeIs('admin.*') ? 'active' : '' }}">

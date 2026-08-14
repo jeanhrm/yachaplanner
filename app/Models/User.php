@@ -22,6 +22,7 @@ class User extends Authenticatable
         'weekly_credits_used', 'weekly_credits_limit',
         'credits_reset_at', 'preferences', 'locale',
         'ugel', 'region', 'nivel', 'area_docente', 'institucion',
+        'steam_stage', 'projects_completed', 'badges', 'current_journey',
     ];
 
     protected $hidden = [
@@ -37,6 +38,8 @@ class User extends Authenticatable
         'preferences'        => 'array',
         'plan_expires_at'    => 'datetime',
         'credits_reset_at'   => 'datetime',
+        'badges'          => 'array',
+        'current_journey' => 'array',
     ];
 
     public function ugel(): BelongsTo
@@ -102,5 +105,65 @@ class User extends Authenticatable
             'pro', 'institution' => 999,
             default => max(0, 5 - $this->weekly_credits_used),
         };
+    }
+    // Insignia actual según proyectos completados
+    public function getCurrentBadge(): array
+    {
+        $completed = $this->projects_completed ?? 0;
+
+        if ($completed >= 10) return ['emoji' => '🦙', 'name' => 'Yachaq STEAM',       'color' => '#7c3aed'];
+        if ($completed >= 5)  return ['emoji' => '⭐', 'name' => 'Maestro STEAM',       'color' => '#d97706'];
+        if ($completed >= 3)  return ['emoji' => '🔬', 'name' => 'Investigador STEAM',  'color' => '#0284c7'];
+        if ($completed >= 1)  return ['emoji' => '🌱', 'name' => 'Explorador STEAM',    'color' => '#059669'];
+        return                       ['emoji' => '🌀', 'name' => 'Aprendiz STEAM',      'color' => '#9ca3af'];
+    }
+
+    // Próxima insignia
+    public function getNextBadge(): array
+    {
+        $completed = $this->projects_completed ?? 0;
+
+        if ($completed >= 10) return ['name' => '¡Nivel máximo!', 'need' => 0];
+        if ($completed >= 5)  return ['name' => 'Yachaq STEAM 🦙',      'need' => 10 - $completed];
+        if ($completed >= 3)  return ['name' => 'Maestro STEAM ⭐',     'need' => 5  - $completed];
+        if ($completed >= 1)  return ['name' => 'Investigador STEAM 🔬', 'need' => 3  - $completed];
+        return                       ['name' => 'Explorador STEAM 🌱',   'need' => 1  - $completed];
+    }
+
+    // Etapa actual del proyecto
+    public function getCurrentStage(): int
+    {
+        return $this->steam_stage ?? 0;
+    }
+
+    // Avanzar etapa
+    public function advanceStage(array $stageData = []): void
+    {
+        $journey = $this->current_journey ?? [];
+        $stage   = $this->steam_stage ?? 0;
+
+        $journey['stage_' . $stage] = array_merge([
+            'completed_at' => now()->toISOString(),
+        ], $stageData);
+
+        $newStage = $stage + 1;
+
+        // Si completó las 5 etapas — proyecto terminado
+        if ($newStage >= 5) {
+            $this->update([
+                'steam_stage'        => 0,
+                'projects_completed' => ($this->projects_completed ?? 0) + 1,
+                'current_journey'    => [],
+                'badges'             => array_merge(
+                    $this->badges ?? [],
+                    [['badge' => $this->getCurrentBadge(), 'date' => now()->toISOString()]]
+                ),
+            ]);
+        } else {
+            $this->update([
+                'steam_stage'     => $newStage,
+                'current_journey' => $journey,
+            ]);
+        }
     }
 }
