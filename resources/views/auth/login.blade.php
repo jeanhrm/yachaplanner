@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Iniciar sesión — YachaPlanner</title>
+    <title>Iniciar sesión — Yachaycito STEAM 2.0</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -319,8 +319,8 @@
 <div class="left-panel">
     <div class="left-content">
         <div class="left-logo">🌱</div>
-        <h1 class="left-title">YachaPlanner</h1>
-        <p class="left-subtitle">Planificaciones innovadora en minutos,<br>adaptadas a tu realidad local</p>
+        <h1 class="left-title">Yachaycito STEAM 2.0</h1>
+        <p class="left-subtitle">Planificaciones STEAM en minutos,<br>adaptadas a tu realidad local</p>
 
         <div class="feature-list">
             <div class="feature-item">
@@ -392,7 +392,7 @@
             </div>
 
             <button type="submit" class="btn-submit">
-                Ingresar a YachaPlanner →
+                Ingresar a Yachaycito STEAM 2.0 →
             </button>
 
             <div class="divider">o</div>

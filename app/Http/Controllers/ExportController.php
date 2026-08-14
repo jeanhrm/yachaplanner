@@ -54,9 +54,9 @@ class ExportController extends Controller
 </style>
 </head>
 <body>
-<div class="header">YachaPlanner — Planificación Curricular STEAM</div>
+<div class="header">Yachaycito STEAM 2.0 — Planificación Curricular STEAM</div>
 ' . $html . '
-<div class="footer">Generado con YachaPlanner · yachaplanner-production.up.railway.app</div>
+<div class="footer">Generado con Yachaycito STEAM 2.0 · yachaplanner-production.up.railway.app</div>
 </body>
 </html>';
 

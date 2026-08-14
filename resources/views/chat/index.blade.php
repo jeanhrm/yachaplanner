@@ -6,7 +6,7 @@
 
                 {{-- Logo --}}
                 <div style="font-size:15px;font-weight:700;color:#fff;margin-right:8px;display:flex;align-items:center;gap:6px;">
-                    🌱 <span>YachaPlanner</span>
+                    🌱 <span>Yachaycito STEAM 2.0</span>
                 </div>
 
                 <div style="width:1px;height:24px;background:rgba(255,255,255,0.3);"></div>
@@ -252,7 +252,7 @@
             <div id="messages">
                 <div class="welcome-msg">
                     <div class="w-icon">🌱</div>
-                    <h3>¡Bienvenido a YachaPlanner!</h3>
+                    <h3>¡Bienvenido a Yachaycito STEAM 2.0!</h3>
                     <p>Tu asistente pedagógico STEAM para docentes del Perú</p>
                     <div class="welcome-steps">
                         <div class="welcome-step">
@@ -542,7 +542,7 @@
             document.getElementById('messages').innerHTML = '';
             showTyping();
 
-            const prompt = `Eres YachaPlanner, asistente pedagógico STEAM para docentes del Perú, alineado al CNEB.
+            const prompt = `Eres Yachaycito STEAM 2.0, asistente pedagógico STEAM para docentes del Perú, alineado al CNEB.
 
 Un docente configuró este contexto:
 - Región: {{ $userRegion }}

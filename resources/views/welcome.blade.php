@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YachaPlanner — Planificación Curricular STEAM para Docentes del Perú</title>
+    <title>Yachaycito STEAM 2.0 — Planificación Curricular STEAM para Docentes del Perú</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -136,7 +136,7 @@
 <!-- NAV -->
 <nav>
     <div class="nav-inner">
-        <a href="/" class="nav-logo">🌱 Yacha<span>Planner</span></a>
+        <a href="/" class="nav-logo">🌱 Yachaycito <span>STEAM 2.0</span></a>
         <div class="nav-links">
             <a href="#modulos">Módulos</a>
             <a href="#como">Cómo funciona</a>
@@ -156,7 +156,7 @@
 <section class="hero">
     <div class="hero-badge">🇵🇪 Para docentes de todo el Perú</div>
     <h1>Planificaciones STEAM en <em>minutos</em>,<br>adaptadas a tu realidad local</h1>
-    <p>YachaPlanner usa inteligencia artificial para generar sesiones de aprendizaje, proyectos ABP y rúbricas alineadas al CNEB — con el contexto real de tu región, comunidad y cultura.</p>
+    <p>Yachaycito STEAM 2.0 usa inteligencia artificial para generar sesiones de aprendizaje, proyectos ABP y rúbricas alineadas al CNEB — con el contexto real de tu región, comunidad y cultura.</p>
     <div class="hero-btns">
         @auth
             <a href="{{ route('chat.index') }}" class="btn-primary">Ir a mi planificador →</a>
@@ -244,7 +244,7 @@
             <div class="step">
                 <div class="step-num">1</div>
                 <h3>Configura tu contexto</h3>
-                <p>Indica tu región, área curricular, nivel y con quién trabajas. YachaPlanner entiende tu realidad local.</p>
+                <p>Indica tu región, área curricular, nivel y con quién trabajas. Yachaycito STEAM 2.0 entiende tu realidad local.</p>
             </div>
             <div class="step">
                 <div class="step-num">2</div>
@@ -265,7 +265,7 @@
     <div class="section-inner">
         <div class="section-label">Cobertura nacional</div>
         <h2 class="section-title">Diseñado para la diversidad del Perú</h2>
-        <p class="section-sub">YachaPlanner adapta el contexto pedagógico a la realidad de cada región — desde la Amazonía hasta los Andes, desde la costa norte hasta el sur andino.</p>
+        <p class="section-sub">Yachaycito STEAM 2.0 adapta el contexto pedagógico a la realidad de cada región — desde la Amazonía hasta los Andes, desde la costa norte hasta el sur andino.</p>
         <div class="regions-grid">
             <div class="region-tag"><span class="region-icon">🏔️</span>Huancavelica</div>
             <div class="region-tag"><span class="region-icon">🌊</span>Lima</div>
@@ -301,7 +301,7 @@
     <div class="section-inner">
         <div class="section-label">Inteligencia contextual</div>
         <h2 class="section-title">La IA entiende tu entorno local</h2>
-        <p class="section-sub">No es una herramienta genérica. YachaPlanner adapta cada planificación a la realidad geográfica, cultural y social de tu comunidad.</p>
+        <p class="section-sub">No es una herramienta genérica. Yachaycito STEAM 2.0 adapta cada planificación a la realidad geográfica, cultural y social de tu comunidad.</p>
         <div class="context-grid">
             <div class="context-item">
                 <div class="emoji">🏔️</div>
@@ -340,7 +340,7 @@
 <!-- TESTIMONIOS -->
 <section class="testimonios">
     <div class="section-inner">
-        <div class="section-label">Docentes que ya usan YachaPlanner</div>
+        <div class="section-label">Docentes que ya usan Yachaycito STEAM 2.0</div>
         <h2 class="section-title">Lo que dicen nuestros docentes</h2>
         <div class="testimonios-grid">
             <div class="testimonio-card">
@@ -364,7 +364,7 @@
                 </div>
             </div>
             <div class="testimonio-card">
-                <p class="testimonio-text">Como docente unidocente multigrado, necesitaba algo que entendiera mi contexto. YachaPlanner lo hace. El proyecto ABP que generé articuló 3 grados a la vez.</p>
+                <p class="testimonio-text">Como docente unidocente multigrado, necesitaba algo que entendiera mi contexto. Yachaycito STEAM 2.0 lo hace. El proyecto ABP que generé articuló 3 grados a la vez.</p>
                 <div class="testimonio-autor">
                     <div class="testimonio-avatar">👩</div>
                     <div class="testimonio-info">
@@ -387,7 +387,7 @@
             <div class="pricing-card">
                 <div class="pricing-name">Gratuito</div>
                 <div class="pricing-price">S/ 0 <span>/ prueba</span></div>
-                <div class="pricing-desc">Para conocer YachaPlanner sin compromiso.</div>
+                <div class="pricing-desc">Para conocer Yachaycito STEAM 2.0 sin compromiso.</div>
                 <ul class="pricing-features">
                     <li>5 generaciones de prueba</li>
                     <li>Los 4 módulos disponibles</li>
@@ -424,7 +424,7 @@
                     <li>Capacitación incluida</li>
                     <li>Soporte dedicado</li>
                 </ul>
-                <a href="https://wa.me/51910673119?text=Hola,%20quiero%20información%20sobre%20el%20plan%20Institución%20de%20YachaPlanner" target="_blank" class="btn-plan btn-plan-outline">Consultar →</a>
+                <a href="https://wa.me/51910673119?text=Hola,%20quiero%20información%20sobre%20el%20plan%20Institución%20de%20Yachaycito STEAM 2.0" target="_blank" class="btn-plan btn-plan-outline">Consultar →</a>
             </div>
         </div>
     </div>
@@ -445,7 +445,7 @@
 
 <!-- FOOTER -->
 <footer>
-    <div class="footer-logo">🌱 YachaPlanner</div>
+    <div class="footer-logo">🌱 Yachaycito STEAM 2.0</div>
     <p style="margin-top:8px;">
         Desarrollado por <a href="#">Quipubit — Escuela Tecnológica</a> · Huancavelica, Perú<br>
         Planificación curricular STEAM para docentes de todo el Perú · Alineado al CNEB

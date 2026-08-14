@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>YachaPlanner — {{ config('app.name', 'YachaPlanner') }}</title>
+    <title>Yachaycito STEAM 2.0 — {{ config('app.name', 'Yachaycito STEAM 2.0') }}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -234,7 +234,7 @@
         {{-- Logo --}}
         <a href="{{ route('dashboard') }}" class="yp-nav-logo">
             <div class="logo-icon">🌱</div>
-            Yacha<span>Planner</span>
+            Yachaycito <span>STEAM 2.0</span>
         </a>
 
         {{-- Links --}}
