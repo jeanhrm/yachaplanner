@@ -79,44 +79,6 @@
         .context-item h3 { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
         .context-item p { font-size: 13px; color: #d1fae5; line-height: 1.5; }
 
-        /* REGIONES */
-        .regions { padding: 80px 24px; background: #f9fafb; }
-        .regions-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-top: 40px; }
-        .region-tag { background: #fff; border: 1px solid #d1fae5; border-radius: 10px; padding: 12px 16px; text-align: center; font-size: 13px; font-weight: 500; color: #374151; transition: all 0.15s; }
-        .region-tag:hover { background: #f0fdf4; border-color: #059669; color: #059669; }
-        .region-tag .region-icon { font-size: 20px; display: block; margin-bottom: 4px; }
-
-        /* PRECIOS */
-        .pricing { padding: 80px 24px; background: #fff; }
-        .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; margin-top: 48px; max-width: 900px; margin-left: auto; margin-right: auto; }
-        .pricing-card { background: #fff; border-radius: 16px; padding: 32px; border: 2px solid #e5e7eb; position: relative; }
-        .pricing-card.featured { border-color: #059669; }
-        .pricing-card.featured::before { content: 'MÁS POPULAR'; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: #059669; color: #fff; font-size: 11px; font-weight: 700; padding: 4px 16px; border-radius: 20px; letter-spacing: 0.08em; }
-        .pricing-name { font-size: 14px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
-        .pricing-price { font-size: 40px; font-weight: 800; color: #111827; margin-bottom: 4px; }
-        .pricing-price span { font-size: 16px; font-weight: 500; color: #9ca3af; }
-        .pricing-desc { font-size: 14px; color: #6b7280; margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid #f3f4f6; }
-        .pricing-features { list-style: none; display: flex; flex-direction: column; gap: 12px; margin-bottom: 32px; }
-        .pricing-features li { font-size: 14px; color: #374151; display: flex; align-items: center; gap: 10px; }
-        .pricing-features li::before { content: '✓'; color: #059669; font-weight: 700; flex-shrink: 0; }
-        .pricing-features li.off { color: #9ca3af; }
-        .pricing-features li.off::before { content: '–'; color: #d1d5db; }
-        .btn-plan { display: block; text-align: center; padding: 12px; border-radius: 10px; font-size: 15px; font-weight: 600; text-decoration: none; transition: all 0.15s; }
-        .btn-plan-green { background: #059669; color: #fff; }
-        .btn-plan-green:hover { background: #047857; }
-        .btn-plan-outline { background: #fff; color: #059669; border: 2px solid #059669; }
-        .btn-plan-outline:hover { background: #f0fdf4; }
-
-        /* TESTIMONIOS */
-        .testimonios { padding: 80px 24px; background: #f9fafb; }
-        .testimonios-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; margin-top: 48px; }
-        .testimonio-card { background: #fff; border-radius: 16px; padding: 28px; border: 1px solid #d1fae5; box-shadow: 0 2px 12px rgba(5,150,105,0.06); }
-        .testimonio-text { font-size: 15px; color: #374151; line-height: 1.7; margin-bottom: 20px; font-style: italic; }
-        .testimonio-text::before { content: '"'; font-size: 40px; color: #d1fae5; line-height: 0; vertical-align: -16px; margin-right: 4px; }
-        .testimonio-autor { display: flex; align-items: center; gap: 12px; }
-        .testimonio-avatar { width: 44px; height: 44px; background: linear-gradient(135deg, #059669, #047857); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
-        .testimonio-info h4 { font-size: 14px; font-weight: 600; color: #111827; }
-        .testimonio-info p { font-size: 12px; color: #9ca3af; }
 
         /* CTA FINAL */
         .cta { padding: 100px 24px; background: #fff; text-align: center; }
@@ -140,13 +102,11 @@
         <div class="nav-links">
             <a href="#modulos">Módulos</a>
             <a href="#como">Cómo funciona</a>
-            <a href="#regiones">Regiones</a>
-            <a href="#precios">Precios</a>
             @auth
                 <a href="{{ route('chat.index') }}" class="nav-cta">Ir al planificador →</a>
             @else
                 <a href="{{ route('login') }}">Iniciar sesión</a>
-                <a href="{{ route('register') }}" class="nav-cta">Empezar gratis →</a>
+                <a href="{{ route('register') }}" class="nav-cta">Crear cuenta →</a>
             @endauth
         </div>
     </div>
@@ -260,41 +220,7 @@
     </div>
 </section>
 
-<!-- REGIONES -->
-<section class="regions" id="regiones">
-    <div class="section-inner">
-        <div class="section-label">Cobertura nacional</div>
-        <h2 class="section-title">Diseñado para la diversidad del Perú</h2>
-        <p class="section-sub">Yachaycito STEAM 2.0 adapta el contexto pedagógico a la realidad de cada región — desde la Amazonía hasta los Andes, desde la costa norte hasta el sur andino.</p>
-        <div class="regions-grid">
-            <div class="region-tag"><span class="region-icon">🏔️</span>Huancavelica</div>
-            <div class="region-tag"><span class="region-icon">🌊</span>Lima</div>
-            <div class="region-tag"><span class="region-icon">🌿</span>Loreto</div>
-            <div class="region-tag"><span class="region-icon">⛰️</span>Cusco</div>
-            <div class="region-tag"><span class="region-icon">🌄</span>Ayacucho</div>
-            <div class="region-tag"><span class="region-icon">🌺</span>San Martín</div>
-            <div class="region-tag"><span class="region-icon">🏝️</span>Piura</div>
-            <div class="region-tag"><span class="region-icon">🦙</span>Puno</div>
-            <div class="region-tag"><span class="region-icon">🌋</span>Arequipa</div>
-            <div class="region-tag"><span class="region-icon">🐟</span>Ucayali</div>
-            <div class="region-tag"><span class="region-icon">🌾</span>Junín</div>
-            <div class="region-tag"><span class="region-icon">🦅</span>La Libertad</div>
-            <div class="region-tag"><span class="region-icon">🌻</span>Lambayeque</div>
-            <div class="region-tag"><span class="region-icon">🐊</span>Madre de Dios</div>
-            <div class="region-tag"><span class="region-icon">🏜️</span>Ica</div>
-            <div class="region-tag"><span class="region-icon">🌱</span>Apurímac</div>
-            <div class="region-tag"><span class="region-icon">🐦</span>Amazonas</div>
-            <div class="region-tag"><span class="region-icon">⛺</span>Huánuco</div>
-            <div class="region-tag"><span class="region-icon">🌊</span>Tumbes</div>
-            <div class="region-tag"><span class="region-icon">🏞️</span>Áncash</div>
-            <div class="region-tag"><span class="region-icon">🌄</span>Moquegua</div>
-            <div class="region-tag"><span class="region-icon">⛰️</span>Tacna</div>
-            <div class="region-tag"><span class="region-icon">🌿</span>Pasco</div>
-            <div class="region-tag"><span class="region-icon">🏔️</span>Cajamarca</div>
-            <div class="region-tag"><span class="region-icon">🌊</span>Callao</div>
-        </div>
-    </div>
-</section>
+
 
 <!-- CONTEXTO LOCAL -->
 <section class="context">
@@ -337,98 +263,7 @@
     </div>
 </section>
 
-<!-- TESTIMONIOS -->
-<section class="testimonios">
-    <div class="section-inner">
-        <div class="section-label">Docentes que ya usan Yachaycito STEAM 2.0</div>
-        <h2 class="section-title">Lo que dicen nuestros docentes</h2>
-        <div class="testimonios-grid">
-            <div class="testimonio-card">
-                <p class="testimonio-text">Por primera vez tengo una herramienta que entiende que trabajo en zona rural con pocos recursos. La sesión que generé sobre la papa nativa fue perfecta para mis estudiantes.</p>
-                <div class="testimonio-autor">
-                    <div class="testimonio-avatar">👩</div>
-                    <div class="testimonio-info">
-                        <h4>María Quispe</h4>
-                        <p>Docente de Ciencias · Huancavelica</p>
-                    </div>
-                </div>
-            </div>
-            <div class="testimonio-card">
-                <p class="testimonio-text">Solía demorar 3 horas en hacer una programación bimestral. Ahora lo hago en 15 minutos y queda mucho mejor. Lo adapté a la realidad amazónica sin problemas.</p>
-                <div class="testimonio-autor">
-                    <div class="testimonio-avatar">👨</div>
-                    <div class="testimonio-info">
-                        <h4>Carlos Panduro</h4>
-                        <p>Docente de Comunicación · Loreto</p>
-                    </div>
-                </div>
-            </div>
-            <div class="testimonio-card">
-                <p class="testimonio-text">Como docente unidocente multigrado, necesitaba algo que entendiera mi contexto. Yachaycito STEAM 2.0 lo hace. El proyecto ABP que generé articuló 3 grados a la vez.</p>
-                <div class="testimonio-autor">
-                    <div class="testimonio-avatar">👩</div>
-                    <div class="testimonio-info">
-                        <h4>Rosa Mamani</h4>
-                        <p>Docente Unidocente · Puno</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
 
-<!-- PRECIOS -->
-<section class="pricing" id="precios">
-    <div class="section-inner">
-        <div class="section-label">Planes</div>
-        <h2 class="section-title">Precios pensados para docentes peruanos</h2>
-        <p class="section-sub">Prueba gratis. Actualiza cuando necesites más.</p>
-        <div class="pricing-grid">
-            <div class="pricing-card">
-                <div class="pricing-name">Gratuito</div>
-                <div class="pricing-price">S/ 0 <span>/ prueba</span></div>
-                <div class="pricing-desc">Para conocer Yachaycito STEAM 2.0 sin compromiso.</div>
-                <ul class="pricing-features">
-                    <li>5 generaciones de prueba</li>
-                    <li>Los 4 módulos disponibles</li>
-                    <li>Exportar Word (con marca de agua)</li>
-                    <li>Contexto adaptado a tu región</li>
-                    <li class="off">Generaciones ilimitadas</li>
-                    <li class="off">Sin marca de agua</li>
-                </ul>
-                <a href="{{ route('register') }}" class="btn-plan btn-plan-outline">Empezar gratis</a>
-            </div>
-            <div class="pricing-card featured">
-                <div class="pricing-name">Pro Docente</div>
-                <div class="pricing-price">S/ 25 <span>/ mes</span></div>
-                <div class="pricing-desc">Para docentes que planifican cada semana.</div>
-                <ul class="pricing-features">
-                    <li>Generaciones ilimitadas</li>
-                    <li>Los 4 módulos disponibles</li>
-                    <li>Word sin marca de agua</li>
-                    <li>Historial completo</li>
-                    <li>Soporte por WhatsApp</li>
-                    <li>Sesiones semanales automáticas</li>
-                </ul>
-                <a href="{{ route('register') }}" class="btn-plan btn-plan-green">Obtener Pro →</a>
-            </div>
-            <div class="pricing-card">
-                <div class="pricing-name">Institución</div>
-                <div class="pricing-price">S/ 350 <span>/ año</span></div>
-                <div class="pricing-desc">Para IEs, UGELs y municipios.</div>
-                <ul class="pricing-features">
-                    <li>Hasta 30 docentes Pro</li>
-                    <li>Panel del director</li>
-                    <li>Contexto institucional propio</li>
-                    <li>Factura para UGEL o municipio</li>
-                    <li>Capacitación incluida</li>
-                    <li>Soporte dedicado</li>
-                </ul>
-                <a href="https://wa.me/51910673119?text=Hola,%20quiero%20información%20sobre%20el%20plan%20Institución%20de%20Yachaycito STEAM 2.0" target="_blank" class="btn-plan btn-plan-outline">Consultar →</a>
-            </div>
-        </div>
-    </div>
-</section>
 
 <!-- CTA FINAL -->
 <section class="cta">
@@ -438,7 +273,7 @@
         @auth
             <a href="{{ route('chat.index') }}" class="btn-primary">Ir a mi planificador →</a>
         @else
-            <a href="{{ route('register') }}" class="btn-primary">Empezar gratis →</a>
+            <a href="{{ route('register') }}" class="btn-primary">Crear cuenta →</a>
         @endauth
     </div>
 </section>
@@ -447,7 +282,7 @@
 <footer>
     <div class="footer-logo">🌱 Yachaycito STEAM 2.0</div>
     <p style="margin-top:8px;">
-        Desarrollado por <a href="#">Quipubit — Escuela Tecnológica</a> · Huancavelica, Perú<br>
+        Desarrollado por <a href="#">Jean C Ordoñez</a> · Huancavelica, Perú<br>
         Planificación curricular STEAM para docentes de todo el Perú · Alineado al CNEB
     </p>
     <p style="margin-top:16px;">
