@@ -150,14 +150,21 @@ class User extends Authenticatable
 
         // Si completó las 5 etapas — proyecto terminado
         if ($newStage >= 5) {
+            $previousBadge = $this->getCurrentBadge()['name'];
+            $this->projects_completed = ($this->projects_completed ?? 0) + 1;
+            $newBadge = $this->getCurrentBadge();
+
+            // Solo se registra la insignia cuando se alcanza un nuevo nivel
+            $badges = $this->badges ?? [];
+            if ($newBadge['name'] !== $previousBadge) {
+                $badges[] = ['badge' => $newBadge, 'date' => now()->toISOString()];
+            }
+
             $this->update([
                 'steam_stage'        => 0,
-                'projects_completed' => ($this->projects_completed ?? 0) + 1,
+                'projects_completed' => $this->projects_completed,
                 'current_journey'    => [],
-                'badges'             => array_merge(
-                    $this->badges ?? [],
-                    [['badge' => $this->getCurrentBadge(), 'date' => now()->toISOString()]]
-                ),
+                'badges'             => $badges,
             ]);
         } else {
             $this->update([

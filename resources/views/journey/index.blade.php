@@ -226,8 +226,10 @@
                     <div style="font-size:12px;color:#1e40af;background:#eff6ff;border-radius:8px;padding:8px 12px;margin-bottom:10px;line-height:1.5;">
                         📌 {{ $stage['task'] }}
                     </div>
-                    <button class="btn-stage btn-complete"
-                        onclick="completeStage({{ $i }}, '{{ addslashes($stage['action']) }}', '{{ addslashes($stage['badge']) }}')">
+                    <button type="button" class="btn-stage btn-complete js-complete-stage"
+                        data-stage="{{ $i }}"
+                        data-action="{{ $stage['action'] }}"
+                        data-badge="{{ $stage['badge'] }}">
                         {{ $stage['action'] }} →
                     </button>
 
@@ -267,24 +269,35 @@
     </div>
 
     <script>
-        async function completeStage(stageIndex, action, badge) {
+        document.querySelectorAll('.js-complete-stage').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                completeStage(btn, parseInt(btn.dataset.stage, 10), btn.dataset.action, btn.dataset.badge);
+            });
+        });
+
+        async function completeStage(btn, stageIndex, action, badge) {
+            btn.disabled = true;
             try {
                 const res = await fetch('{{ route("journey.advance") }}', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'Accept': 'application/json',
                         'X-CSRF-TOKEN': '{{ csrf_token() }}'
                     },
                     body: JSON.stringify({
+                        stage: stageIndex,
                         stage_data: { action: action, badge: badge }
                     })
                 });
+
+                if (res.status === 409) { window.location.reload(); return; }
 
                 const data = await res.json();
 
                 if (data.success) {
                     // Mostrar celebración
-                    const isProjectComplete = data.new_stage === 0 && data.completed > 0;
+                    const isProjectComplete = data.project_complete;
 
                     document.getElementById('modalEmoji').textContent = isProjectComplete ? data.badge.emoji : '🏅';
                     document.getElementById('modalTitle').textContent = isProjectComplete
@@ -296,7 +309,9 @@
 
                     document.getElementById('celebrationModal').classList.add('open');
                 }
+                else { btn.disabled = false; }
             } catch(e) {
+                btn.disabled = false;
                 alert('Error al avanzar. Intenta de nuevo.');
             }
         }
