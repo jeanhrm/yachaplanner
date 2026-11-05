@@ -25,8 +25,12 @@ class ExportController extends Controller
         }
 
         $content  = $lastAssistant->content;
+
+        // La retroalimentación del modo revisión es para el docente, no va en el documento
+        $content  = preg_replace('/^##\s*RETROALIMENTACI[ÓO]N A TU PROPUESTA.*?(?=^##\s)/msu', '', $content) ?? $content;
+
         $html     = $this->markdownToHtml($content);
-        $filename = 'yachaplanner_' . $session->module . '_' . date('Ymd_His') . '.doc';
+        $filename = 'yachaycito_' . $session->module . '_' . date('Ymd_His') . '.doc';
 
         $fullHtml = '
 <html xmlns:o="urn:schemas-microsoft-com:office:office"

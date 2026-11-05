@@ -213,7 +213,8 @@ Al terminar di siempre: "✅ Tu rúbrica está lista. Puedes descargarla con el 
             ModuleConfig::updateOrCreate(
                 ['slug' => $module['slug']],
                 array_merge($module, [
-                    'max_tokens'          => 2000,
+                    // Un documento completo con tablas (más la retroalimentación en modo revisión) no entra en 2000
+                    'max_tokens'          => 4096,
                     'model'               => 'claude-sonnet-4-20250514',
                     'temperature'         => 0.7,
                     'export_docx_enabled' => true,

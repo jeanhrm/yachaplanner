@@ -26,13 +26,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/chat', [ChatController::class, 'store'])->name('chat.store');
 
     // Historial de sesión
-    Route::get('/chat/session/{session}', function(\App\Models\ChatSession $session) {
-        if ($session->user_id !== auth()->id()) abort(403);
-        $messages = \App\Models\ChatMessage::where('session_id', $session->id)
-                    ->orderBy('created_at')
-                    ->get(['role','content']);
-        return response()->json(['messages' => $messages]);
-    })->name('chat.session');
+    Route::get('/chat/session/{session}', [ChatController::class, 'session'])->name('chat.session');
 
     // Ideas STEAM — create ANTES de show
     Route::get('/ideas', [ProjectIdeaController::class, 'index'])->name('ideas.index');
