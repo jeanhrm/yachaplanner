@@ -10,6 +10,7 @@ use App\Support\PlanningContext;
 use App\Support\WhatsApp;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class ChatController extends Controller
@@ -352,8 +353,9 @@ class ChatController extends Controller
                 return;
             }
 
-            // Guardar respuesta del asistente
-            ChatMessage::create([
+            // Guardar respuesta del asistente. Tras minutos de espera la conexión a la BD
+            // puede haberse cerrado: se reintenta una vez reconectando.
+            $saveReply = fn () => ChatMessage::create([
                 'session_id'    => $sessionId,
                 'user_id'       => $userId,
                 'role'          => 'assistant',
@@ -363,6 +365,25 @@ class ChatController extends Controller
                 'latency_ms'    => $latency,
                 'model_used'    => $modelName,
             ]);
+            try {
+                try {
+                    $saveReply();
+                } catch (\Throwable $e) {
+                    Log::warning('Reintentando guardar respuesta', ['session_id' => $sessionId, 'error' => $e->getMessage()]);
+                    DB::reconnect();
+                    $saveReply();
+                }
+            } catch (\Throwable $e) {
+                Log::error('No se pudo guardar la respuesta', ['session_id' => $sessionId, 'error' => $e->getMessage()]);
+                echo 'data: ' . json_encode([
+                    'error'             => 'save_failed',
+                    'session_id'        => $sessionId,
+                    'credits_remaining' => $user->remainingCredits(),
+                ]) . "\n\n";
+                if (ob_get_level()) ob_flush();
+                flush();
+                return;
+            }
 
             // Solo descontar crédito si NO es sugerencia interna
             if (!$esInterna) {
