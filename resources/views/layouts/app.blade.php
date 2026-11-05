@@ -248,6 +248,16 @@
             <a href="{{ route('journey.index') }}" class="yp-nav-link {{ request()->routeIs('journey.*') ? 'active' : '' }}">
                 🌱 Mi Ruta
             </a>
+            @php
+                $navIlimit   = in_array(auth()->user()->plan ?? 'free', ['pro', 'institution']);
+                $navCreditos = auth()->user()->remainingCredits();
+            @endphp
+            <a href="{{ route('credits.index') }}"
+               class="yp-nav-link {{ request()->routeIs('credits.*') ? 'active' : '' }}"
+               title="Obtener más créditos"
+               style="{{ !$navIlimit && $navCreditos === 0 ? 'background:#fef3c7;color:#92400e;' : '' }}">
+                ⚡ {{ $navIlimit ? 'Pro' : $navCreditos . ' créditos' }}
+            </a>
             @if(in_array(auth()->user()->email, ['jean@quipubit.com','ventas@quipubit.com']))
             <a href="{{ route('admin.index') }}" class="yp-nav-link {{ request()->routeIs('admin.*') ? 'active' : '' }}">
                 🛡️ Admin
@@ -282,6 +292,9 @@
                     </a>
                     <a href="{{ route('chat.index') }}" class="yp-dropdown-item">
                         ✍️ Planificador
+                    </a>
+                    <a href="{{ route('credits.index') }}" class="yp-dropdown-item">
+                        ⚡ Obtener más créditos
                     </a>
 
                     <div class="yp-dropdown-divider"></div>

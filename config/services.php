@@ -37,6 +37,10 @@ return [
 
     'anthropic' => [
     'key' => env('ANTHROPIC_API_KEY'),
-]
+],
+
+    'whatsapp' => [
+        'number' => env('WHATSAPP_NUMBER', '51910673119'),
+    ],
 
 ];

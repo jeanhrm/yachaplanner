@@ -258,18 +258,50 @@
 
     <div class="credits-layout">
 
+        @php
+            $plan       = $user->plan ?? 'free';
+            $esIlimit   = in_array($plan, ['pro', 'institution']);
+            $restantes  = $user->remainingCredits();
+            $planNombre = ['pro' => 'Plan Pro', 'institution' => 'Plan Institución'][$plan] ?? 'Plan Gratuito';
+        @endphp
+
         {{-- Estado actual --}}
         <div class="credits-status">
             <div class="credits-status-left">
-                <h3>Créditos disponibles esta semana</h3>
-                <div class="credit-num">{{ $user->remainingCredits() }}</div>
-                <div class="credit-label">de 5 créditos de prueba (plan gratuito)</div>
+                <h3>Créditos disponibles</h3>
+                <div class="credit-num">{{ $esIlimit ? '∞' : $restantes }}</div>
+                <div class="credit-label">
+                    @if($esIlimit)
+                        Generaciones ilimitadas
+                    @else
+                        Cada sesión, programación, proyecto o rúbrica generada usa 1 crédito
+                    @endif
+                </div>
             </div>
             <div class="credits-status-right">
-                <div class="plan-name">Plan Gratuito</div>
-                <p>Se reinician<br>cada lunes</p>
+                <div class="plan-name">{{ $planNombre }}</div>
+                @if($esIlimit && $user->plan_expires_at)
+                    <p>Vigente hasta<br>{{ $user->plan_expires_at->format('d/m/Y') }}</p>
+                @elseif(!$esIlimit)
+                    <p>Recarga por<br>WhatsApp</p>
+                @endif
             </div>
         </div>
+
+        {{-- Recarga de créditos --}}
+        @unless($esIlimit)
+        <div class="plan-card" style="margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;">
+            <div style="flex:1;min-width:240px;">
+                <div class="plan-name">{{ $restantes === 0 ? 'Te quedaste sin créditos' : 'Recargar créditos' }}</div>
+                <div class="plan-desc" style="margin-bottom:0;">
+                    Escríbenos por WhatsApp y te enviamos los paquetes de créditos disponibles para seguir generando sesiones, programaciones, proyectos STEAM y rúbricas.
+                </div>
+            </div>
+            <a href="{{ $whatsappCreditos }}" target="_blank" rel="noopener" class="btn-whatsapp" style="width:auto;min-width:220px;">
+                💬 Pedir créditos por WhatsApp
+            </a>
+        </div>
+        @endunless
 
         {{-- Planes --}}
         <div class="plans-grid">
