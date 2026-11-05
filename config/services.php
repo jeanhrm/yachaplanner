@@ -36,7 +36,9 @@ return [
     ],
 
     'anthropic' => [
-    'key' => env('ANTHROPIC_API_KEY'),
+    'key'   => env('ANTHROPIC_API_KEY'),
+    // Si Anthropic retira un modelo, basta con cambiar ANTHROPIC_MODEL en Railway
+    'model' => env('ANTHROPIC_MODEL', 'claude-sonnet-5-5'),
 ],
 
     'whatsapp' => [

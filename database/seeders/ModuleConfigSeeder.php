@@ -213,9 +213,9 @@ Al terminar di siempre: "✅ Tu rúbrica está lista. Puedes descargarla con el 
             ModuleConfig::updateOrCreate(
                 ['slug' => $module['slug']],
                 array_merge($module, [
-                    // Un documento completo con tablas (más la retroalimentación en modo revisión) no entra en 2000
-                    'max_tokens'          => 4096,
-                    'model'               => 'claude-sonnet-4-20250514',
+                    // Documento completo con tablas + retroalimentación + el razonamiento interno del modelo
+                    'max_tokens'          => 16000,
+                    'model'               => config('services.anthropic.model'),
                     'temperature'         => 0.7,
                     'export_docx_enabled' => true,
                     'export_pdf_enabled'  => true,

@@ -215,20 +215,33 @@ class ChatController extends Controller
         }
         $sessionId    = $session->id;
         $userId       = $user->id;
-        $modelName    = $module->model;
-        $maxTokens    = $module->max_tokens;
+        // El modelo de config (ANTHROPIC_MODEL) manda: así un modelo retirado no rompe la app
+        $modelName    = config('services.anthropic.model') ?: $module->model;
+        // Los modelos actuales piensan antes de escribir y eso también consume max_tokens
+        $maxTokens    = max((int) $module->max_tokens, 16000);
         $apiKey       = config('services.anthropic.key');
 
-        $payload = json_encode([
+        $body = [
             'model'      => $modelName,
             'max_tokens' => $maxTokens,
             'stream'     => true,
             'system'     => $systemPrompt,
             'messages'   => $history,
-        ]);
+        ];
+        $headers = [
+            'Content-Type: application/json',
+            'x-api-key: ' . $apiKey,
+            'anthropic-version: 2023-06-01',
+        ];
+        // Si el filtro de seguridad rechaza un pedido legítimo, la API reintenta con otro modelo
+        if (in_array($modelName, ['claude-sonnet-5-5', 'claude-opus-5-5', 'claude-opus-5', 'claude-fable-5-1'], true)) {
+            $body['fallbacks'] = 'default';
+            $headers[]         = 'anthropic-beta: server-side-fallback-2026-07-01';
+        }
+        $payload = json_encode($body);
 
         return response()->stream(function () use (
-            $apiKey, $payload, $sessionId, $userId, $modelName, $user, $session, $esInterna
+            $apiKey, $payload, $headers, $sessionId, $userId, $modelName, $user, $session, $esInterna
         ) {
             $fullReply = '';
             $tokensIn  = 0;
@@ -240,11 +253,7 @@ class ChatController extends Controller
             $ch = curl_init('https://api.anthropic.com/v1/messages');
             curl_setopt_array($ch, [
                 CURLOPT_POST          => true,
-                CURLOPT_HTTPHEADER    => [
-                    'Content-Type: application/json',
-                    'x-api-key: ' . $apiKey,
-                    'anthropic-version: 2023-06-01',
-                ],
+                CURLOPT_HTTPHEADER    => $headers,
                 CURLOPT_POSTFIELDS    => $payload,
                 CURLOPT_WRITEFUNCTION => function ($ch, $data) use (&$fullReply, &$tokensIn, &$tokensOut, &$buffer, &$rawError) {
                     $buffer .= $data;
@@ -262,6 +271,11 @@ class ChatController extends Controller
                         if ($json === '[DONE]') continue;
                         $event = json_decode($json, true);
                         if (!$event) continue;
+
+                        // Errores a mitad del stream (sobrecarga, etc.) llegan como evento SSE
+                        if (($event['type'] ?? '') === 'error' && strlen($rawError) < 1000) {
+                            $rawError .= $json;
+                        }
 
                         if (($event['type'] ?? '') === 'message_start') {
                             $tokensIn = $event['message']['usage']['input_tokens'] ?? 0;
@@ -281,7 +295,7 @@ class ChatController extends Controller
                     }
                     return strlen($data);
                 },
-                CURLOPT_TIMEOUT => 120,
+                CURLOPT_TIMEOUT => 300,
             ]);
 
             curl_exec($ch);
