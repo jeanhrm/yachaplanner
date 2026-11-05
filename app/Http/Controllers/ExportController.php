@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ChatSession;
 use App\Models\ChatMessage;
-use Illuminate\Http\Request;
+use App\Models\ChatSession;
+use App\Support\DocxExporter;
 use Illuminate\Support\Facades\Auth;
 
 class ExportController extends Controller
 {
-    public function word(Request $request, ChatSession $session)
+    public function word(ChatSession $session, DocxExporter $exporter)
     {
         // (int): en PostgreSQL/PDO el id puede llegar como string y !== fallaría siempre
         if ((int) $session->user_id !== (int) Auth::id()) {
@@ -25,172 +25,19 @@ class ExportController extends Controller
             abort(404, 'Este documento todavía no tiene contenido para descargar.');
         }
 
-        $content  = $lastAssistant->content;
+        $content = $lastAssistant->content;
 
         // La retroalimentación del modo revisión es para el docente, no va en el documento
-        $content  = preg_replace('/^##\s*RETROALIMENTACI[ÓO]N A TU PROPUESTA.*?(?=^##\s)/msu', '', $content) ?? $content;
+        $content = preg_replace('/^##\s*RETROALIMENTACI[ÓO]N A TU PROPUESTA.*?(?=^##\s)/msu', '', $content) ?? $content;
 
-        $html     = $this->markdownToHtml($content);
-        $filename = 'yachaycito_' . $session->module . '_' . date('Ymd_His') . '.doc';
+        // El cierre "✅ Tu sesión está lista. Puedes descargarla..." es para el chat, no para el documento
+        $content = preg_replace('/^\s*✅[^\n]*(Exportar|Descargar)[^\n]*$/mu', '', $content) ?? $content;
 
-        $fullHtml = '
-<html xmlns:o="urn:schemas-microsoft-com:office:office"
-      xmlns:w="urn:schemas-microsoft-com:office:word"
-      xmlns="http://www.w3.org/TR/REC-html40">
-<head>
-<meta charset="UTF-8">
-<style>
-    body { font-family: Arial, sans-serif; font-size: 11pt; color: #111827; margin: 2cm; }
-    h1 { font-size: 16pt; color: #1a7a4a; border-bottom: 2px solid #d1fae5; padding-bottom: 4px; }
-    h2 { font-size: 13pt; color: #1a7a4a; margin-top: 20px; border-bottom: 1px solid #d1fae5; padding-bottom: 3px; }
-    h3 { font-size: 11pt; color: #374151; margin-top: 14px; }
-    p  { line-height: 1.6; margin: 6px 0; }
-    ul, ol { padding-left: 20px; margin: 6px 0; }
-    li { margin-bottom: 4px; line-height: 1.5; }
-    table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 10pt; }
-    th { background-color: #1a7a4a; color: #ffffff; padding: 6px 10px; text-align: left; font-weight: bold; }
-    td { padding: 5px 10px; border: 1px solid #d1fae5; }
-    tr:nth-child(even) td { background-color: #f0fdf4; }
-    strong { font-weight: bold; color: #065f46; }
-    em { font-style: italic; }
-    hr { border: 1px solid #d1fae5; margin: 12px 0; }
-    .header { text-align: right; color: #1a7a4a; font-size: 9pt; font-weight: bold; margin-bottom: 20px; }
-    .footer { text-align: center; color: #999999; font-size: 8pt; margin-top: 20px; border-top: 1px solid #e5e7eb; padding-top: 8px; }
-</style>
-</head>
-<body>
-<div class="header">Yachaycito STEAM 2.0 — Planificación Curricular STEAM</div>
-' . $html . '
-<div class="footer">Generado con Yachaycito STEAM 2.0 · yachaplanner-production.up.railway.app</div>
-</body>
-</html>';
+        $path     = $exporter->build($content, $session->display_title);
+        $filename = 'yachaycito_' . $session->module . '_' . date('Ymd_His') . '.docx';
 
-        return response($fullHtml)
-            ->header('Content-Type', 'application/msword')
-            ->header('Content-Disposition', 'attachment; filename="' . $filename . '"')
-            ->header('Content-Length', strlen($fullHtml));
-    }
-
-    private function markdownToHtml(string $markdown): string
-    {
-        // Convertir <br> literales en saltos solo en líneas que NO son de tabla
-        $lines_temp = explode("\n", $markdown);
-        $markdown = implode("\n", array_map(function($line) {
-            if (str_starts_with(trim($line), '|')) {
-                // En tablas: mantener <br> como separador visual
-                return $line;
-            }
-            // Fuera de tablas: convertir a salto de línea
-            return str_replace(['<br>', '<br/>', '<br />'], "\n", $line);
-        }, $lines_temp));
-    
-        $lines   = explode("\n", $markdown);
-        $html    = '';
-        $inTable = false;
-        $tableHtml = '';
-        $inList  = false;
-
-        foreach ($lines as $line){
-            $trimmed = trim($line);
-
-            // Tablas
-            if (str_starts_with($trimmed, '|')) {
-                if (!$inTable) {
-                    $inTable   = true;
-                    $tableHtml = '<table>';
-                }
-                // Saltar separadores |---|
-                if (preg_match('/^\|[\s\-|:]+\|$/', $trimmed)) continue;
-
-                $cells    = array_map('trim', explode('|', trim($trimmed, '|')));
-                $isHeader = ($tableHtml === '<table>');
-                $tag      = $isHeader ? 'th' : 'td';
-                $tableHtml .= '<tr>';
-                foreach ($cells as $cell) {
-                    // Convertir listas con • en líneas separadas
-                    $cell = str_replace('• ', '<br>• ', $cell);
-                    $cell = ltrim($cell, '<br>');
-                    $tableHtml .= "<{$tag}>" . $this->inlineFormat($cell) . "</{$tag}>";
-                }
-                $tableHtml .= '</tr>';
-                continue;
-            }
-
-            // Cerrar tabla
-            if ($inTable) {
-                $html   .= $tableHtml . '</table>';
-                $tableHtml = '';
-                $inTable = false;
-            }
-
-            // Cerrar lista
-            if ($inList && !preg_match('/^[-*]\s+/', $trimmed)) {
-                $html  .= '</ul>';
-                $inList = false;
-            }
-
-            if (empty($trimmed)) {
-                $html .= '<br>';
-                continue;
-            }
-
-            if (str_starts_with($trimmed, '### ')) {
-                $html .= '<h3>' . $this->inlineFormat(substr($trimmed, 4)) . '</h3>';
-            } elseif (str_starts_with($trimmed, '## ')) {
-                $html .= '<h2>' . $this->inlineFormat(substr($trimmed, 3)) . '</h2>';
-            } elseif (str_starts_with($trimmed, '# ')) {
-                $html .= '<h1>' . $this->inlineFormat(substr($trimmed, 2)) . '</h1>';
-            } elseif (preg_match('/^[-*]\s+(.+)/', $trimmed, $m)) {
-                if (!$inList) {
-                    $html  .= '<ul>';
-                    $inList = true;
-                }
-                $html .= '<li>' . $this->inlineFormat($m[1]) . '</li>';
-            } elseif (str_starts_with($trimmed, '---')) {
-                $html .= '<hr>';
-            } else {
-                $html .= '<p>' . $this->inlineFormat($trimmed) . '</p>';
-            }
-        }
-
-        // Cerrar tabla o lista al final
-        if ($inTable)  $html .= $tableHtml . '</table>';
-        if ($inList)   $html .= '</ul>';
-
-        return $html;
-    }
-
-    private function inlineFormat(string $text): string
-{
-    $text = str_replace('<br>', '%%BR%%', $text);
-    $bolds   = [];
-    $italics = [];
-
-    // Extraer bold **texto** antes de escapar
-    $text = preg_replace_callback('/\*\*([^*]+)\*\*/', function($m) use (&$bolds) {
-        $key = '%%BOLD' . count($bolds) . '%%';
-        $bolds[$key] = '<strong>' . htmlspecialchars($m[1], ENT_QUOTES, 'UTF-8') . '</strong>';
-        return $key;
-    }, $text);
-
-    // Extraer italic *texto* antes de escapar
-    $text = preg_replace_callback('/\*([^*]+)\*/', function($m) use (&$italics) {
-        $key = '%%ITALIC' . count($italics) . '%%';
-        $italics[$key] = '<em>' . htmlspecialchars($m[1], ENT_QUOTES, 'UTF-8') . '</em>';
-        return $key;
-    }, $text);
-
-    // Escapar el resto
-    $text = htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
-
-    // Restaurar bold e italic
-    foreach ($bolds as $key => $val) {
-        $text = str_replace(htmlspecialchars($key, ENT_QUOTES, 'UTF-8'), $val, $text);
-    }
-    foreach ($italics as $key => $val) {
-        $text = str_replace(htmlspecialchars($key, ENT_QUOTES, 'UTF-8'), $val, $text);
-    }
-    $text = str_replace('%%BR%%', '<br>', $text);
-    return $text;
+        return response()->download($path, $filename, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        ])->deleteFileAfterSend();
     }
 }
