@@ -11,7 +11,8 @@ class ExportController extends Controller
 {
     public function word(Request $request, ChatSession $session)
     {
-        if ($session->user_id !== Auth::id()) {
+        // (int): en PostgreSQL/PDO el id puede llegar como string y !== fallaría siempre
+        if ((int) $session->user_id !== (int) Auth::id()) {
             abort(403);
         }
 
@@ -21,7 +22,7 @@ class ExportController extends Controller
                                     ->first();
 
         if (!$lastAssistant) {
-            return back()->with('error', 'No hay contenido para exportar.');
+            abort(404, 'Este documento todavía no tiene contenido para descargar.');
         }
 
         $content  = $lastAssistant->content;

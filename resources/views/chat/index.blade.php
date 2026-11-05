@@ -648,7 +648,7 @@
         async function send(body, titleForRecent) {
             setBusy(true);
             showTyping();
-            let bubble = null, full = '', apiError = false;
+            let bubble = null, full = '', apiError = false, finished = false;
             try {
                 const res = await fetch(STORE_URL, {
                     method: 'POST',
@@ -677,6 +677,7 @@
                         if (!json) continue;
                         let data;
                         try { data = JSON.parse(json); } catch (e) { continue; }
+                        if (data.session_id) currentSessionId = data.session_id;
                         if (data.chunk !== undefined) {
                             full += data.chunk;
                             if (!bubble) { removeTyping(); bubble = addMessage('assistant', '').querySelector('.bubble-bot'); }
@@ -690,7 +691,7 @@
                             if (data.credits_remaining !== undefined) document.getElementById('credits-count').textContent = data.credits_remaining;
                         }
                         if (data.done) {
-                            currentSessionId = data.session_id;
+                            finished = true;
                             document.getElementById('credits-count').textContent = data.credits_remaining;
                             upsertRecent(data.session_id, body.module, titleForRecent);
                         }
@@ -698,6 +699,23 @@
                 }
                 removeTyping();
                 if (!full) throw new Error('empty');
+                if (!finished) {
+                    // Llegó texto pero el servidor no confirmó que lo guardó: no ofrecer una descarga que fallará
+                    const w = addMessage('assistant', '⚠️ La respuesta se cortó antes de guardarse. Usa **Intentar de nuevo** para generarla completa.');
+                    const retry = document.createElement('button');
+                    retry.type = 'button';
+                    retry.className = 'btn-export';
+                    retry.style.marginTop = '10px';
+                    retry.textContent = '🔄 Intentar de nuevo';
+                    retry.addEventListener('click', () => {
+                        if (busy) return;
+                        w.remove();
+                        if (bubble) bubble.closest('.msg-bot').remove();
+                        send(Object.assign({}, body, { session_id: currentSessionId }), titleForRecent);
+                    });
+                    w.querySelector('.bubble-bot').appendChild(retry);
+                    return false;
+                }
                 document.getElementById('export-btn').style.display = 'inline-block';
                 document.getElementById('adjust').style.display = 'block';
                 return true;
@@ -743,7 +761,9 @@
         }
 
         document.getElementById('export-btn').addEventListener('click', function () {
-            if (currentSessionId) window.open(`/export/word/${currentSessionId}`, '_blank');
+            // Descarga directa: el servidor responde como adjunto y la página no cambia
+            // (window.open a una pestaña nueva lo bloquean algunos celulares)
+            if (currentSessionId) window.location.href = `/export/word/${currentSessionId}`;
         });
         document.getElementById('btn-new').addEventListener('click', () => showWizard(true));
 

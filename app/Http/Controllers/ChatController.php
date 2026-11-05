@@ -57,7 +57,7 @@ class ChatController extends Controller
 
     public function session(ChatSession $session)
     {
-        if ($session->user_id !== Auth::id()) abort(403);
+        if ((int) $session->user_id !== (int) Auth::id()) abort(403);
 
         $messages = ChatMessage::where('session_id', $session->id)
                     ->where('content', '!=', '__sugerencia_interna__')
@@ -243,6 +243,16 @@ class ChatController extends Controller
         return response()->stream(function () use (
             $apiKey, $payload, $headers, $sessionId, $userId, $modelName, $user, $session, $esInterna
         ) {
+            // Una generación con razonamiento supera los 30 s por defecto de PHP;
+            // si el proceso muere a mitad, no se guarda la respuesta ni se puede exportar
+            @set_time_limit(0);
+            ignore_user_abort(true);
+
+            // El navegador recibe el id de sesión de inmediato, no solo al final
+            echo 'data: ' . json_encode(['session_id' => $sessionId]) . "\n\n";
+            if (ob_get_level()) ob_flush();
+            flush();
+
             $fullReply = '';
             $tokensIn  = 0;
             $tokensOut = 0;
