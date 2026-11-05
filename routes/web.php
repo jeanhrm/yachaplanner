@@ -10,7 +10,22 @@ use App\Http\Controllers\ProjectIdeaController;
 use App\Http\Controllers\SteamJourneyController;
 
 Route::get('/', function () {
-    return view('welcome');
+    // Prueba social real: solo se muestra cuando la cifra ya convence (ver welcome.blade.php)
+    $stats = \Illuminate\Support\Facades\Cache::remember('landing_stats', 3600, function () {
+        try {
+            return [
+                'docentes'   => \App\Models\User::count(),
+                'documentos' => \App\Models\ChatMessage::where('role', 'assistant')->count(),
+            ];
+        } catch (\Throwable $e) {
+            return ['docentes' => 0, 'documentos' => 0];
+        }
+    });
+
+    return view('welcome', [
+        'stats'    => $stats,
+        'whatsapp' => \App\Support\WhatsApp::link('Hola! Soy docente y quiero saber cómo usar Yachaycito STEAM para planificar mis clases.'),
+    ]);
 });
 
 Route::get('/dashboard', function () {

@@ -3,294 +3,354 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Yachaycito STEAM 2.0 — Planificación Curricular STEAM para Docentes del Perú</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <title>Yachaycito STEAM — Sesiones y proyectos STEAM para tu aula real, alineados al CNEB</title>
+    <meta name="description" content="Responde preguntas sencillas sobre tus estudiantes, tus recursos y tu comunidad, y recibe tu sesión de aprendizaje, proyecto ABP o rúbrica alineada al CNEB, lista en Word. Gratis para empezar.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', sans-serif; color: #111827; background: #fff; }
+        html { scroll-behavior: smooth; }
+        body { font-family: 'Inter', sans-serif; color: #111827; background: #fff; -webkit-font-smoothing: antialiased; }
+        a { color: inherit; }
+        .wrap { max-width: 1120px; margin: 0 auto; padding: 0 20px; }
 
         /* NAV */
-        nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px); border-bottom: 1px solid #f3f4f6; }
-        .nav-inner { max-width: 1200px; margin: 0 auto; padding: 0 24px; height: 64px; display: flex; align-items: center; justify-content: space-between; }
-        .nav-logo { display: flex; align-items: center; gap: 10px; font-size: 18px; font-weight: 700; color: #059669; text-decoration: none; }
-        .nav-logo span { color: #111827; }
-        .nav-links { display: flex; align-items: center; gap: 32px; }
-        .nav-links a { font-size: 14px; color: #6b7280; text-decoration: none; font-weight: 500; transition: color 0.15s; }
-        .nav-links a:hover { color: #059669; }
-        .nav-cta { background: #059669; color: #fff !important; padding: 8px 20px; border-radius: 8px; font-weight: 600 !important; }
-        .nav-cta:hover { background: #047857 !important; }
+        nav { position: sticky; top: 0; z-index: 50; background: rgba(255,255,255,.94); backdrop-filter: blur(8px); border-bottom: 1px solid #f1f5f9; }
+        .nav-in { height: 60px; display: flex; align-items: center; justify-content: space-between; }
+        .logo { font-size: 18px; font-weight: 800; color: #059669; text-decoration: none; }
+        .logo span { color: #111827; }
+        .nav-r { display: flex; align-items: center; gap: 18px; font-size: 14px; font-weight: 600; }
+        .nav-r a { text-decoration: none; color: #4b5563; }
+        .nav-r a:hover { color: #059669; }
 
-        /* HERO */
-        .hero { padding: 140px 24px 100px; background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 50%, #fff 100%); text-align: center; position: relative; overflow: hidden; }
-        .hero::before { content: ''; position: absolute; top: -100px; right: -100px; width: 500px; height: 500px; background: radial-gradient(circle, rgba(5,150,105,0.08) 0%, transparent 70%); border-radius: 50%; }
-        .hero-badge { display: inline-flex; align-items: center; gap: 6px; background: #d1fae5; color: #065f46; font-size: 12px; font-weight: 600; padding: 6px 14px; border-radius: 20px; margin-bottom: 24px; letter-spacing: 0.05em; text-transform: uppercase; }
-        .hero h1 { font-size: clamp(32px, 5vw, 56px); font-weight: 800; line-height: 1.15; color: #111827; max-width: 800px; margin: 0 auto 24px; }
-        .hero h1 em { color: #059669; font-style: normal; }
-        .hero p { font-size: 18px; color: #6b7280; max-width: 620px; margin: 0 auto 40px; line-height: 1.7; }
-        .hero-btns { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
-        .btn-primary { background: #059669; color: #fff; padding: 14px 32px; border-radius: 10px; font-size: 16px; font-weight: 600; text-decoration: none; transition: all 0.15s; display: inline-flex; align-items: center; gap: 8px; }
-        .btn-primary:hover { background: #047857; transform: translateY(-1px); box-shadow: 0 8px 24px rgba(5,150,105,0.3); }
-        .btn-secondary { background: #fff; color: #374151; padding: 14px 32px; border-radius: 10px; font-size: 16px; font-weight: 600; text-decoration: none; border: 2px solid #e5e7eb; transition: all 0.15s; }
-        .btn-secondary:hover { border-color: #059669; color: #059669; }
-        .hero-stats { display: flex; gap: 48px; justify-content: center; margin-top: 64px; flex-wrap: wrap; }
-        .stat { text-align: center; }
-        .stat-num { font-size: 32px; font-weight: 800; color: #059669; }
-        .stat-label { font-size: 13px; color: #9ca3af; margin-top: 4px; }
+        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border-radius: 12px; font-weight: 700; text-decoration: none; transition: transform .15s, box-shadow .15s, background .15s; }
+        .btn-main { background: #059669; color: #fff !important; padding: 15px 26px; font-size: 17px; box-shadow: 0 6px 18px rgba(5,150,105,.28); }
+        .btn-main:hover { background: #047857; transform: translateY(-1px); }
+        .btn-sm { padding: 9px 16px; font-size: 14px; border-radius: 10px; box-shadow: none; }
+        .btn-ghost { color: #065f46 !important; padding: 15px 20px; font-size: 16px; }
+        .btn-ghost:hover { text-decoration: underline; }
 
-        /* PROBLEMA */
-        .problem { padding: 80px 24px; background: #fff; }
-        .section-inner { max-width: 1200px; margin: 0 auto; }
-        .section-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #059669; margin-bottom: 12px; }
-        .section-title { font-size: clamp(24px, 3vw, 36px); font-weight: 700; color: #111827; margin-bottom: 16px; }
-        .section-sub { font-size: 16px; color: #6b7280; max-width: 600px; line-height: 1.7; }
-        .problem-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; margin-top: 48px; }
-        .problem-card { background: #fef2f2; border: 1px solid #fecaca; border-radius: 12px; padding: 24px; }
-        .problem-card .icon { font-size: 28px; margin-bottom: 12px; }
-        .problem-card h3 { font-size: 15px; font-weight: 600; color: #991b1b; margin-bottom: 8px; }
-        .problem-card p { font-size: 14px; color: #6b7280; line-height: 1.6; }
+        /* HERO: todo lo esencial cabe en la primera pantalla */
+        .hero { background: linear-gradient(160deg, #ecfdf5 0%, #f0fdf4 45%, #fff 100%); padding: 40px 0 44px; }
+        .hero-grid { display: grid; grid-template-columns: 1.05fr .95fr; gap: 44px; align-items: center; }
+        .pill { display: inline-block; background: #d1fae5; color: #065f46; font-size: 13px; font-weight: 700; padding: 6px 12px; border-radius: 999px; margin-bottom: 18px; }
+        h1 { font-size: clamp(30px, 4.4vw, 50px); line-height: 1.1; font-weight: 800; letter-spacing: -.02em; margin-bottom: 18px; }
+        h1 em { font-style: normal; color: #059669; }
+        .lead { font-size: 18px; line-height: 1.6; color: #4b5563; margin-bottom: 26px; max-width: 540px; }
+        .cta-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+        .reassure { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 16px; font-size: 14px; color: #374151; font-weight: 500; }
+        .reassure span::before { content: '✓ '; color: #059669; font-weight: 800; }
+        .proof { margin-top: 22px; font-size: 14px; color: #6b7280; }
+        .proof b { color: #111827; }
 
-        /* MÓDULOS */
-        .modules { padding: 80px 24px; background: #f9fafb; }
-        .modules-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px; margin-top: 48px; }
-        .module-card { background: #fff; border-radius: 16px; padding: 28px; border: 1px solid #e5e7eb; transition: all 0.2s; position: relative; overflow: hidden; }
-        .module-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: #059669; }
-        .module-card:hover { transform: translateY(-4px); box-shadow: 0 16px 40px rgba(0,0,0,0.08); border-color: #a7f3d0; }
-        .module-icon { font-size: 36px; margin-bottom: 16px; }
-        .module-card h3 { font-size: 17px; font-weight: 700; color: #111827; margin-bottom: 8px; }
-        .module-card p { font-size: 14px; color: #6b7280; line-height: 1.6; }
-        .module-tag { display: inline-block; margin-top: 16px; background: #d1fae5; color: #065f46; font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 20px; }
+        /* Vista previa del producto */
+        .demo { background: #fff; border: 1px solid #e5e7eb; border-radius: 20px; box-shadow: 0 24px 60px rgba(6,95,70,.12); padding: 20px; position: relative; }
+        .demo-step { font-size: 12px; font-weight: 700; color: #059669; text-transform: uppercase; letter-spacing: .06em; }
+        .demo-q { font-size: 17px; font-weight: 700; margin: 6px 0 12px; }
+        .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+        .chip { font-size: 13px; font-weight: 600; padding: 7px 11px; border-radius: 999px; border: 1.5px solid #e5e7eb; color: #6b7280; background: #fff; }
+        .chip.on { border-color: #059669; background: #ecfdf5; color: #065f46; }
+        .chip.off { text-decoration: line-through; opacity: .6; }
+        .demo-arrow { text-align: center; font-size: 13px; color: #6b7280; margin: 14px 0; font-weight: 600; }
+        .doc { border: 1px solid #d1fae5; border-radius: 14px; overflow: hidden; }
+        .doc-h { background: #1a7a4a; color: #fff; padding: 10px 14px; font-size: 13px; font-weight: 700; display: flex; justify-content: space-between; }
+        .doc-b { padding: 12px 14px; font-size: 13px; color: #374151; line-height: 1.55; }
+        .doc-b b { color: #065f46; }
+        .doc-row { display: grid; grid-template-columns: 74px 1fr; gap: 8px; padding: 6px 0; border-bottom: 1px dashed #e5e7eb; }
+        .doc-row:last-child { border-bottom: none; }
+        .doc-row span:first-child { font-weight: 700; color: #059669; }
+        .word-tag { position: absolute; right: -10px; bottom: -14px; background: #1d4ed8; color: #fff; font-size: 13px; font-weight: 700; padding: 8px 12px; border-radius: 10px; box-shadow: 0 8px 20px rgba(29,78,216,.3); }
 
-        /* CÓMO FUNCIONA */
-        .how { padding: 80px 24px; background: #fff; }
-        .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 32px; margin-top: 48px; }
-        .step { text-align: center; }
-        .step-num { width: 48px; height: 48px; background: #059669; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700; margin: 0 auto 16px; }
-        .step h3 { font-size: 15px; font-weight: 600; color: #111827; margin-bottom: 8px; }
-        .step p { font-size: 14px; color: #6b7280; line-height: 1.6; }
+        /* SECCIONES compactas */
+        section { padding: 56px 0; }
+        .kicker { font-size: 13px; font-weight: 800; color: #059669; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 8px; }
+        h2 { font-size: clamp(24px, 3vw, 34px); font-weight: 800; letter-spacing: -.01em; line-height: 1.2; margin-bottom: 10px; }
+        .sub { color: #4b5563; font-size: 17px; line-height: 1.6; max-width: 640px; }
 
-        /* CONTEXTO PERÚ */
-        .context { padding: 80px 24px; background: linear-gradient(135deg, #059669 0%, #047857 100%); color: #fff; }
-        .context .section-label { color: #a7f3d0; }
-        .context .section-title { color: #fff; }
-        .context .section-sub { color: #d1fae5; }
-        .context-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 24px; margin-top: 48px; }
-        .context-item { background: rgba(255,255,255,0.1); border-radius: 12px; padding: 24px; border: 1px solid rgba(255,255,255,0.15); }
-        .context-item .emoji { font-size: 32px; margin-bottom: 12px; }
-        .context-item h3 { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
-        .context-item p { font-size: 13px; color: #d1fae5; line-height: 1.5; }
+        /* Datos del Perú */
+        .facts { background: #064e3b; color: #fff; }
+        .facts .kicker { color: #6ee7b7; }
+        .facts .sub { color: #d1fae5; }
+        .fact-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 28px; }
+        .fact { background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.12); border-radius: 16px; padding: 20px; }
+        .fact-n { font-size: 38px; font-weight: 800; color: #6ee7b7; line-height: 1; }
+        .fact-t { font-size: 15px; font-weight: 700; margin: 8px 0 10px; }
+        .fact-y { font-size: 14px; color: #d1fae5; line-height: 1.5; padding-top: 10px; border-top: 1px solid rgba(255,255,255,.12); }
+        .fact-y b { color: #fff; }
+        .sources { font-size: 12px; color: #a7f3d0; margin-top: 16px; opacity: .8; }
 
+        /* Qué puedes crear */
+        .make-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 26px; }
+        .make { border: 1px solid #e5e7eb; border-radius: 16px; padding: 18px; }
+        .make-i { font-size: 26px; }
+        .make h3 { font-size: 16px; font-weight: 700; margin: 8px 0 4px; }
+        .make p { font-size: 14px; color: #6b7280; line-height: 1.5; }
 
-        /* CTA FINAL */
-        .cta { padding: 100px 24px; background: #fff; text-align: center; }
-        .cta h2 { font-size: clamp(28px, 4vw, 44px); font-weight: 800; color: #111827; margin-bottom: 16px; }
-        .cta p { font-size: 18px; color: #6b7280; margin-bottom: 40px; }
+        /* Diferencial: aprender a planificar */
+        .learn { background: #f9fafb; }
+        .learn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; }
+        .ticks { list-style: none; margin-top: 18px; display: grid; gap: 12px; }
+        .ticks li { font-size: 16px; color: #374151; line-height: 1.5; padding-left: 30px; position: relative; }
+        .ticks li::before { content: '✓'; position: absolute; left: 0; top: 0; width: 22px; height: 22px; border-radius: 50%; background: #d1fae5; color: #065f46; font-weight: 800; font-size: 13px; display: flex; align-items: center; justify-content: center; }
+        .fb { background: #fff; border: 1px solid #e5e7eb; border-radius: 18px; padding: 20px; box-shadow: 0 12px 32px rgba(0,0,0,.06); }
+        .fb-t { font-size: 13px; font-weight: 800; color: #059669; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 12px; }
+        .fb-i { font-size: 14px; line-height: 1.55; color: #374151; padding: 10px 12px; border-radius: 10px; margin-bottom: 8px; }
+        .fb-i.ok  { background: #ecfdf5; }
+        .fb-i.fix { background: #fffbeb; }
+        .fb-i.tip { background: #eff6ff; margin-bottom: 0; }
 
-        /* FOOTER */
-        footer { background: #111827; color: #9ca3af; padding: 40px 24px; text-align: center; }
-        footer .footer-logo { font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 8px; }
-        footer p { font-size: 13px; line-height: 1.6; }
-        footer a { color: #6b7280; text-decoration: none; }
-        footer a:hover { color: #fff; }
+        /* Preguntas frecuentes plegadas: no suman scroll */
+        .faq { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 20px; margin-top: 22px; }
+        details { border: 1px solid #e5e7eb; border-radius: 14px; padding: 14px 16px; background: #fff; }
+        summary { cursor: pointer; font-weight: 700; font-size: 15px; list-style: none; display: flex; justify-content: space-between; gap: 10px; }
+        summary::-webkit-details-marker { display: none; }
+        summary::after { content: '+'; color: #059669; font-size: 20px; line-height: 1; }
+        details[open] summary::after { content: '–'; }
+        details p { font-size: 14px; color: #4b5563; line-height: 1.6; margin-top: 10px; }
+
+        /* CTA final */
+        .final { background: linear-gradient(135deg, #059669, #047857); color: #fff; text-align: center; padding: 52px 0; }
+        .final h2 { color: #fff; }
+        .final .sub { color: #d1fae5; margin: 0 auto 24px; }
+        .final .btn-main { background: #fff; color: #065f46 !important; box-shadow: none; }
+        .final .btn-ghost { color: #fff !important; }
+
+        footer { background: #111827; color: #9ca3af; font-size: 13px; padding: 22px 0; }
+        .foot { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; }
+        footer a { color: #d1d5db; text-decoration: none; }
+
+        /* Ayuda por WhatsApp siempre a la mano */
+        .wa { position: fixed; right: 16px; bottom: 16px; z-index: 60; background: #25d366; color: #fff; text-decoration: none; font-weight: 700; font-size: 14px; padding: 12px 16px; border-radius: 999px; box-shadow: 0 8px 24px rgba(0,0,0,.18); display: flex; align-items: center; gap: 8px; }
+
+        @media (max-width: 900px) {
+            .hero-grid, .learn-grid { grid-template-columns: 1fr; gap: 28px; }
+            .fact-grid, .make-grid { grid-template-columns: repeat(2, 1fr); }
+            .faq { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 560px) {
+            .hero { padding: 26px 0 34px; }
+            .lead { font-size: 16px; }
+            .btn-main { width: 100%; }
+            .nav-r .hide-sm { display: none; }
+            .logo { font-size: 16px; white-space: nowrap; }
+            .nav-r { gap: 12px; white-space: nowrap; }
+            .nav-r .btn-sm { padding: 8px 12px; }
+            section { padding: 40px 0; }
+            .fact-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+            .fact { padding: 14px; }
+            .fact-n { font-size: 30px; }
+            .fact-y { display: none; }           /* en celular: solo el dato, sin texto extra */
+            .make-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+            .make p { display: none; }
+            .demo .doc-row:nth-child(n+3) { display: none; }
+            .word-tag { right: 10px; }
+            .wa span { display: none; }
+        }
+        @media (max-width: 400px) {
+            /* "Ya tengo cuenta" ya está en la primera pantalla */
+            .nav-r .hide-xs, .logo span { display: none; }
+        }
     </style>
 </head>
 <body>
 
-<!-- NAV -->
+@php
+    $ctaUrl   = auth()->check() ? route('chat.index') : route('register');
+    $ctaLabel = auth()->check() ? 'Ir a mi planificador →' : 'Crear mi primera sesión gratis →';
+    // La prueba social solo aparece cuando la cifra ya convence
+    $showProof = ($stats['docentes'] ?? 0) >= 50 || ($stats['documentos'] ?? 0) >= 200;
+@endphp
+
 <nav>
-    <div class="nav-inner">
-        <a href="/" class="nav-logo">🌱 Yachaycito <span>STEAM 2.0</span></a>
-        <div class="nav-links">
-            <a href="#modulos">Módulos</a>
-            <a href="#como">Cómo funciona</a>
+    <div class="wrap nav-in">
+        <a href="/" class="logo">🌱 Yachaycito <span>STEAM</span></a>
+        <div class="nav-r">
+            <a href="#preguntas" class="hide-sm">Preguntas</a>
             @auth
-                <a href="{{ route('chat.index') }}" class="nav-cta">Ir al planificador →</a>
+                <a href="{{ route('chat.index') }}" class="btn btn-main btn-sm">Ir al planificador</a>
             @else
-                <a href="{{ route('login') }}">Iniciar sesión</a>
-                <a href="{{ route('register') }}" class="nav-cta">Crear cuenta →</a>
+                <a href="{{ route('login') }}" class="hide-xs">Ingresar</a>
+                <a href="{{ route('register') }}" class="btn btn-main btn-sm">Empezar gratis</a>
             @endauth
         </div>
     </div>
 </nav>
 
-<!-- HERO -->
-<section class="hero">
-    <div class="hero-badge">🇵🇪 Para docentes de todo el Perú</div>
-    <h1>Planificaciones STEAM en <em>minutos</em>,<br>adaptadas a tu realidad local</h1>
-    <p>Yachaycito STEAM 2.0 usa inteligencia artificial para generar sesiones de aprendizaje, proyectos ABP y rúbricas alineadas al CNEB — con el contexto real de tu región, comunidad y cultura.</p>
-    <div class="hero-btns">
-        @auth
-            <a href="{{ route('chat.index') }}" class="btn-primary">Ir a mi planificador →</a>
-        @else
-            <a href="{{ route('register') }}" class="btn-primary">Empezar gratis →</a>
-            <a href="{{ route('login') }}" class="btn-secondary">Iniciar sesión</a>
-        @endauth
+<!-- 1. HERO: promesa + acción + prueba visual -->
+<header class="hero">
+    <div class="wrap hero-grid">
+        <div>
+            <div class="pill">🇵🇪 Hecho en Huancavelica para docentes de todo el Perú</div>
+            <h1>Tu sesión de aprendizaje lista en minutos, <em>pensada para tu aula real</em></h1>
+            <p class="lead">Respondes preguntas sencillas sobre tus estudiantes, tus recursos y tu comunidad. Recibes un documento alineado al CNEB, listo para imprimir en Word.</p>
+            <div class="cta-row">
+                <a href="{{ $ctaUrl }}" class="btn btn-main">{{ $ctaLabel }}</a>
+                @guest <a href="{{ route('login') }}" class="btn btn-ghost">Ya tengo cuenta</a> @endguest
+            </div>
+            <div class="reassure">
+                <span>5 créditos gratis</span>
+                <span>Sin tarjeta</span>
+                <span>Funciona en el celular</span>
+            </div>
+            @if ($showProof)
+                <p class="proof">
+                    Ya planifican con nosotros <b>{{ number_format($stats['docentes']) }} docentes</b>
+                    @if (($stats['documentos'] ?? 0) >= 200) · <b>{{ number_format($stats['documentos']) }} documentos</b> generados @endif
+                </p>
+            @endif
+        </div>
+
+        <div class="demo" aria-hidden="true">
+            <div class="demo-step">Paso 4 de 7 · Mis recursos</div>
+            <div class="demo-q">¿Con qué cuentas en tu aula?</div>
+            <div class="chips">
+                <span class="chip on">Textos del MINEDU</span>
+                <span class="chip on">Materiales reciclados</span>
+                <span class="chip on">Biohuerto o chacra</span>
+                <span class="chip off">Internet</span>
+                <span class="chip off">Proyector o TV</span>
+            </div>
+            <div class="demo-arrow">↓ La IA solo propone actividades que puedes hacer ↓</div>
+            <div class="doc">
+                <div class="doc-h"><span>Sesión de Aprendizaje</span><span>90 min</span></div>
+                <div class="doc-b">
+                    <div class="doc-row"><span>Tema</span><span>El agua en mi comunidad</span></div>
+                    <div class="doc-row"><span>Aula</span><span>3° y 4° grado · <b>multigrado</b> · quechua</span></div>
+                    <div class="doc-row"><span>Inicio</span><span>Visita al puquio con el sabio de la comunidad</span></div>
+                    <div class="doc-row"><span>Evalúa</span><span>Lista de cotejo con criterios del CNEB</span></div>
+                </div>
+            </div>
+            <div class="word-tag">⬇ Descarga en Word</div>
+        </div>
     </div>
-    <div class="hero-stats">
-        <div class="stat"><div class="stat-num">25</div><div class="stat-label">Regiones del Perú</div></div>
-        <div class="stat"><div class="stat-num">4</div><div class="stat-label">Módulos pedagógicos</div></div>
-        <div class="stat"><div class="stat-num">CNEB</div><div class="stat-label">Alineado al currículo</div></div>
-        <div class="stat"><div class="stat-num">Word</div><div class="stat-label">Exportación directa</div></div>
+</header>
+
+<!-- 2. DATOS: por qué una plantilla genérica no sirve en el Perú -->
+<section class="facts">
+    <div class="wrap">
+        <div class="kicker">El Perú no cabe en una plantilla</div>
+        <h2>Cada aula es distinta. Tu planificación también debería serlo.</h2>
+        <p class="sub">Las herramientas genéricas planifican para un aula que no existe. Yachaycito parte de la tuya.</p>
+        <div class="fact-grid">
+            <div class="fact">
+                <div class="fact-n">48</div>
+                <div class="fact-t">lenguas originarias</div>
+                <div class="fact-y">Si tus estudiantes hablan quechua, aimara o asháninka, <b>incluimos palabras y textos en su lengua</b> (enfoque EIB).</div>
+            </div>
+            <div class="fact">
+                <div class="fact-n">55</div>
+                <div class="fact-t">pueblos indígenas</div>
+                <div class="fact-y">Tu festividad, tus sabios y las actividades de tu comunidad <b>se vuelven el contexto de la clase</b>.</div>
+            </div>
+            <div class="fact">
+                <div class="fact-n">31</div>
+                <div class="fact-t">competencias del CNEB</div>
+                <div class="fact-y">Elegimos la competencia, capacidades y desempeños <b>que corresponden a tu grado y tema</b>.</div>
+            </div>
+            <div class="fact">
+                <div class="fact-n">1</div>
+                <div class="fact-t">docente, varios grados</div>
+                <div class="fact-y">En miles de escuelas rurales un solo docente enseña a varios grados. <b>Diferenciamos actividades por grado</b> en la misma sesión.</div>
+            </div>
+        </div>
+        <p class="sources">Fuentes: Ministerio de Educación (lenguas originarias, CNEB 2016) y Base de Datos de Pueblos Indígenas u Originarios del Ministerio de Cultura.</p>
     </div>
 </section>
 
-<!-- PROBLEMA -->
-<section class="problem">
-    <div class="section-inner">
-        <div class="section-label">El problema</div>
-        <h2 class="section-title">Los docentes peruanos pierden horas en planificación</h2>
-        <p class="section-sub">En costa, sierra y selva, los docentes enfrentan realidades distintas que las herramientas genéricas no consideran.</p>
-        <div class="problem-grid">
-            <div class="problem-card">
-                <div class="icon">⏰</div>
-                <h3>Tiempo perdido</h3>
-                <p>Un docente promedio dedica 4-6 horas semanales a elaborar documentos pedagógicos desde cero, tiempo que podría invertir en sus estudiantes.</p>
-            </div>
-            <div class="problem-card">
-                <div class="icon">📋</div>
-                <h3>Formatos complejos</h3>
-                <p>Las plantillas del MINEDU son extensas y difíciles de adaptar. Cada región tiene sus propias particularidades que los formatos genéricos ignoran.</p>
-            </div>
-            <div class="problem-card">
-                <div class="icon">🌍</div>
-                <h3>Sin contexto local</h3>
-                <p>Las herramientas existentes ignoran la diversidad del Perú: la Amazonía, los Andes, la costa norte, las comunidades nativas, los saberes locales.</p>
-            </div>
+<!-- 3. QUÉ PUEDES CREAR -->
+<section>
+    <div class="wrap">
+        <div class="kicker">Qué puedes crear</div>
+        <h2>Todo lo que te piden, en un solo lugar</h2>
+        <div class="make-grid">
+            <div class="make"><div class="make-i">📝</div><h3>Sesión de aprendizaje</h3><p>Inicio, desarrollo y cierre con los minutos exactos que tienes.</p></div>
+            <div class="make"><div class="make-i">🔬</div><h3>Proyecto STEAM / ABP</h3><p>Varias áreas articuladas alrededor de un problema real de tu comunidad.</p></div>
+            <div class="make"><div class="make-i">📅</div><h3>Programación bimestral</h3><p>Competencias, evidencias y cronograma de sesiones del bimestre.</p></div>
+            <div class="make"><div class="make-i">✅</div><h3>Rúbrica de evaluación</h3><p>Niveles AD, A, B y C, con autoevaluación y coevaluación.</p></div>
         </div>
     </div>
 </section>
 
-<!-- MÓDULOS -->
-<section class="modules" id="modulos">
-    <div class="section-inner">
-        <div class="section-label">La solución</div>
-        <h2 class="section-title">4 módulos para toda tu planificación</h2>
-        <p class="section-sub">Cada módulo genera documentos completos alineados al CNEB con enfoque STEAM y el contexto real de tu región.</p>
-        <div class="modules-grid">
-            <div class="module-card">
-                <div class="module-icon">📅</div>
-                <h3>Programación Bimestral</h3>
-                <p>Genera tu programación completa por bimestre con competencias, capacidades, desempeños y cronograma de sesiones adaptado a tu localidad.</p>
-                <span class="module-tag">Primaria y Secundaria</span>
-            </div>
-            <div class="module-card">
-                <div class="module-icon">📝</div>
-                <h3>Sesión de Aprendizaje</h3>
-                <p>Crea sesiones detalladas con secuencia didáctica completa, metodología activa y evaluación formativa contextualizada a tu entorno.</p>
-                <span class="module-tag">ABP · Indagación · Design Thinking</span>
-            </div>
-            <div class="module-card">
-                <div class="module-icon">🔬</div>
-                <h3>Proyecto STEAM / ABP</h3>
-                <p>Diseña proyectos interdisciplinarios con pregunta esencial, fases, conexión STEAM y producto final usando los recursos de tu comunidad.</p>
-                <span class="module-tag">Aprendizaje Basado en Proyectos</span>
-            </div>
-            <div class="module-card">
-                <div class="module-icon">✅</div>
-                <h3>Rúbrica de Evaluación</h3>
-                <p>Genera rúbricas por competencia con criterios AD/A/B/C, autoevaluación y coevaluación listas para usar con tus estudiantes.</p>
-                <span class="module-tag">CNEB · Evaluación formativa</span>
-            </div>
+<!-- 4. DIFERENCIAL: aprender a planificar -->
+<section class="learn">
+    <div class="wrap learn-grid">
+        <div>
+            <div class="kicker">No te reemplaza</div>
+            <h2>Te ayuda a ser mejor planificador</h2>
+            <p class="sub">Escribe tu propia idea de sesión y la IA la revisa como lo haría un buen acompañante pedagógico.</p>
+            <ul class="ticks">
+                <li>Te dice <b>qué hiciste bien</b> y <b>qué mejorar</b>, explicando el porqué.</li>
+                <li>Respeta tu idea: la mejora, no la cambia por otra.</li>
+                <li>Avanzas en la <b>Ruta STEAM</b> y ganas insignias a medida que completas proyectos.</li>
+            </ul>
+        </div>
+        <div class="fb" aria-hidden="true">
+            <div class="fb-t">Retroalimentación a tu propuesta</div>
+            <div class="fb-i ok">✅ <b>Bien:</b> partes de un problema real de la comunidad (la escasez de agua en el puquio).</div>
+            <div class="fb-i fix">🔧 <b>Mejora:</b> tu evidencia no muestra el desempeño. Pide que los estudiantes <i>expliquen</i> por qué baja el agua, no solo que la dibujen.</div>
+            <div class="fb-i tip">💡 <b>Para la próxima:</b> define primero la evidencia y luego diseña las actividades que llevan a ella.</div>
         </div>
     </div>
 </section>
 
-<!-- CÓMO FUNCIONA -->
-<section class="how" id="como">
-    <div class="section-inner">
-        <div class="section-label">Proceso</div>
-        <h2 class="section-title">Listo en 3 pasos</h2>
-        <p class="section-sub">Sin curva de aprendizaje. Sin configuraciones complicadas. Solo describe tu realidad y la IA hace el resto.</p>
-        <div class="steps">
-            <div class="step">
-                <div class="step-num">1</div>
-                <h3>Configura tu contexto</h3>
-                <p>Indica tu región, área curricular, nivel y con quién trabajas. Yachaycito STEAM 2.0 entiende tu realidad local.</p>
-            </div>
-            <div class="step">
-                <div class="step-num">2</div>
-                <h3>Describe tu situación</h3>
-                <p>Escribe en lenguaje natural el problema o situación que quieres trabajar. La IA sugiere la mejor metodología.</p>
-            </div>
-            <div class="step">
-                <div class="step-num">3</div>
-                <h3>Descarga en Word</h3>
-                <p>Obtén tu documento listo para imprimir o compartir. Sigue conversando para refinarlo a tu gusto.</p>
-            </div>
+<!-- 5. PREGUNTAS FRECUENTES (plegadas) -->
+<section id="preguntas">
+    <div class="wrap">
+        <div class="kicker">Preguntas frecuentes</div>
+        <h2>Lo que nos preguntan los docentes</h2>
+        <div class="faq">
+            <details>
+                <summary>¿Necesito saber usar inteligencia artificial?</summary>
+                <p>No. No escribes instrucciones ni "prompts": eliges opciones con botones, paso a paso, como llenar una ficha. Si te trabas, escríbenos por WhatsApp.</p>
+            </details>
+            <details>
+                <summary>¿Cuánto cuesta?</summary>
+                <p>Empiezas gratis con 5 créditos: cada crédito es un documento, y los ajustes también usan uno. Si necesitas más, recargas por WhatsApp. También hay Plan Pro (S/ 25 al mes) y Plan Institución (S/ 350 al año) para toda tu IE.</p>
+            </details>
+            <details>
+                <summary>¿Sirve si mi escuela no tiene internet ni proyector?</summary>
+                <p>Sí, está pensado para eso. Marcas los recursos que sí tienes y la IA no propone actividades que necesiten lo que te falta. Solo necesitas internet en el momento de generar el documento.</p>
+            </details>
+            <details>
+                <summary>¿Está alineado al Currículo Nacional?</summary>
+                <p>Sí. Cada documento usa las competencias, capacidades y desempeños del CNEB, y la evaluación formativa por niveles de logro. Siempre puedes revisarlo y ajustarlo antes de usarlo.</p>
+            </details>
+            <details>
+                <summary>¿Puedo cambiar el documento después?</summary>
+                <p>Sí. Con un botón pides "más corto", "más actividades prácticas" o lo que necesites, y lo descargas de nuevo en Word para editarlo a tu gusto.</p>
+            </details>
+            <details>
+                <summary>¿Funciona para aulas multigrado y EIB?</summary>
+                <p>Sí. Eliges varios grados y la sesión diferencia actividades por grado. Si tus estudiantes hablan una lengua originaria, se incluyen palabras y textos en esa lengua.</p>
+            </details>
         </div>
     </div>
 </section>
-
-
-
-<!-- CONTEXTO LOCAL -->
-<section class="context">
-    <div class="section-inner">
-        <div class="section-label">Inteligencia contextual</div>
-        <h2 class="section-title">La IA entiende tu entorno local</h2>
-        <p class="section-sub">No es una herramienta genérica. Yachaycito STEAM 2.0 adapta cada planificación a la realidad geográfica, cultural y social de tu comunidad.</p>
-        <div class="context-grid">
-            <div class="context-item">
-                <div class="emoji">🏔️</div>
-                <h3>Sierra andina</h3>
-                <p>Papa nativa, quinua, alpaca, quechua, heladas, ferias comunales, río Ichu, cambio climático.</p>
-            </div>
-            <div class="context-item">
-                <div class="emoji">🌿</div>
-                <h3>Amazonía</h3>
-                <p>Biodiversidad, comunidades nativas, río Amazonas, yuca, cacao, medicina tradicional.</p>
-            </div>
-            <div class="context-item">
-                <div class="emoji">🌊</div>
-                <h3>Costa</h3>
-                <p>Pesca artesanal, agricultura costeña, industria, tecnología, emprendimiento urbano.</p>
-            </div>
-            <div class="context-item">
-                <div class="emoji">🏘️</div>
-                <h3>Comunidades rurales</h3>
-                <p>Recursos locales, saberes ancestrales, interculturalidad, trabajo comunitario.</p>
-            </div>
-            <div class="context-item">
-                <div class="emoji">🏫</div>
-                <h3>Escuelas multigrado</h3>
-                <p>Diseño para aulas unidocentes con múltiples grados, recursos mínimos.</p>
-            </div>
-            <div class="context-item">
-                <div class="emoji">🤝</div>
-                <h3>Trabajo colaborativo</h3>
-                <p>Proyectos interdisciplinarios coordinados entre docentes de distintas áreas.</p>
-            </div>
-        </div>
-    </div>
-</section>
-
-
 
 <!-- CTA FINAL -->
-<section class="cta">
-    <h2>¿Listo para planificar con IA?</h2>
-    <p>Únete a docentes de todo el Perú que ya ahorran horas cada semana.</p>
-    <div class="hero-btns">
-        @auth
-            <a href="{{ route('chat.index') }}" class="btn-primary">Ir a mi planificador →</a>
-        @else
-            <a href="{{ route('register') }}" class="btn-primary">Crear cuenta →</a>
-        @endauth
+<section class="final">
+    <div class="wrap">
+        <h2>Tu próxima sesión, lista antes de que se enfríe tu café</h2>
+        <p class="sub">Crea tu cuenta con tu correo y prueba gratis con tus propios estudiantes en mente.</p>
+        <div class="cta-row" style="justify-content:center;">
+            <a href="{{ $ctaUrl }}" class="btn btn-main">{{ $ctaLabel }}</a>
+            <a href="{{ $whatsapp }}" target="_blank" rel="noopener" class="btn btn-ghost">¿Dudas? Escríbenos</a>
+        </div>
     </div>
 </section>
 
-<!-- FOOTER -->
 <footer>
-    <div class="footer-logo">🌱 Yachaycito STEAM 2.0</div>
-    <p style="margin-top:8px;">
-        Desarrollado por <a href="#">Jean C Ordoñez</a> · Huancavelica, Perú<br>
-        Planificación curricular STEAM para docentes de todo el Perú · Alineado al CNEB
-    </p>
-    <p style="margin-top:16px;">
-        <a href="{{ route('login') }}">Iniciar sesión</a> ·
-        <a href="{{ route('register') }}">Registrarse</a> ·
-        <a href="https://wa.me/51910673119" target="_blank">WhatsApp</a>
-    </p>
+    <div class="wrap foot">
+        <span>🌱 Yachaycito STEAM · Desarrollado por Jean C. Ordoñez · Huancavelica, Perú</span>
+        <span>
+            <a href="{{ route('login') }}">Ingresar</a> ·
+            <a href="{{ route('register') }}">Crear cuenta</a> ·
+            <a href="{{ $whatsapp }}" target="_blank" rel="noopener">WhatsApp</a>
+        </span>
+    </div>
 </footer>
+
+<a href="{{ $whatsapp }}" target="_blank" rel="noopener" class="wa" aria-label="Ayuda por WhatsApp">💬 <span>¿Necesitas ayuda?</span></a>
 
 </body>
 </html>
