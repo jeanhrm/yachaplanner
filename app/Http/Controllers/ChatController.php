@@ -97,10 +97,18 @@ class ChatController extends Controller
             return response()->json(['error' => 'Módulo no encontrado'], 404);
         }
 
-        if (!$user->hasCredits()) {
+        // El documento nuevo cuesta lo que indica el módulo (ABP = 2); cada ajuste posterior cuesta 1.
+        // "Nuevo" = la sesión aún no tiene respuesta guardada (incluye reintentos tras un fallo).
+        $isFirstReply = !$request->session_id
+            || !ChatMessage::where('session_id', $request->session_id)->where('role', 'assistant')->exists();
+        $cost = $isFirstReply ? max(1, (int) $module->credits_cost) : 1;
+
+        if (!$user->hasCredits($cost)) {
             return response()->json([
                 'error'       => 'no_credits',
                 'message'     => 'Te quedaste sin créditos',
+                'needed'      => $cost,
+                'remaining'   => $user->remainingCredits(),
                 'whatsapp'    => WhatsApp::creditsLink($user),
                 'credits_url' => route('credits.index'),
             ], 429);
@@ -244,7 +252,7 @@ class ChatController extends Controller
         $payload = json_encode($body);
 
         return response()->stream(function () use (
-            $apiKey, $payload, $headers, $sessionId, $userId, $modelName, $user, $session, $esInterna
+            $apiKey, $payload, $headers, $sessionId, $userId, $modelName, $user, $session, $esInterna, $cost
         ) {
             // Una generación con razonamiento supera los 30 s por defecto de PHP;
             // si el proceso muere a mitad, no se guarda la respuesta ni se puede exportar
@@ -387,7 +395,7 @@ class ChatController extends Controller
 
             // Solo descontar crédito si NO es sugerencia interna
             if (!$esInterna) {
-                $user->increment('weekly_credits_used');
+                $user->increment('weekly_credits_used', $cost);
             }
 
             $session->increment('total_tokens_used', $tokensIn + $tokensOut);

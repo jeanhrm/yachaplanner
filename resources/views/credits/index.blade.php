@@ -274,7 +274,7 @@
                     @if($esIlimit)
                         Generaciones ilimitadas
                     @else
-                        Cada sesión, programación, proyecto o rúbrica generada usa 1 crédito
+                        Sesión, programación o rúbrica: 1 crédito · Proyecto STEAM/ABP: 2 créditos · Cada ajuste: 1 crédito
                     @endif
                 </div>
             </div>

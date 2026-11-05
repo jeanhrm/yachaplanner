@@ -305,7 +305,7 @@
             </details>
             <details>
                 <summary>¿Cuánto cuesta?</summary>
-                <p>Empiezas gratis con 5 créditos: cada crédito es un documento, y los ajustes también usan uno. Si necesitas más, recargas por WhatsApp. También hay Plan Pro (S/ 25 al mes) y Plan Institución (S/ 350 al año) para toda tu IE.</p>
+                <p>Empiezas gratis con 5 créditos. Una sesión, programación o rúbrica usa 1 crédito; un proyecto STEAM/ABP usa 2, y cada ajuste posterior usa 1. Si necesitas más, recargas por WhatsApp. También hay Plan Pro (S/ 25 al mes) y Plan Institución (S/ 350 al año) para toda tu IE.</p>
             </details>
             <details>
                 <summary>¿Sirve si mi escuela no tiene internet ni proyector?</summary>

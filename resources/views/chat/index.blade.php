@@ -204,6 +204,8 @@
             abp:       { icon:'🔬', name:'Proyecto STEAM / ABP',    short:'proyecto',     desc:'Un proyecto donde tus estudiantes resuelven un problema real de su comunidad.' },
             rubrica:   { icon:'✅', name:'Rúbrica de Evaluación',   short:'rúbrica',      desc:'Criterios claros para evaluar un producto o desempeño (AD, A, B, C).' },
         };
+        // Créditos que cuesta generar cada documento (de module_configs); los ajustes cuestan 1
+        const COSTS = @json($modules->pluck('credits_cost', 'slug'));
         const AREAS = {
             Primaria:   ['Matemática','Comunicación','Ciencia y Tecnología','Personal Social','Arte y Cultura','Educación Física','Educación Religiosa','Inglés'],
             Secundaria: ['Matemática','Comunicación','Ciencia y Tecnología','Historia, Geografía y Economía','Desarrollo Personal y Cívica','Arte y Cultura','Educación Física','Inglés','Educación para el Trabajo','Educación Religiosa'],
@@ -290,6 +292,7 @@
                         ${Object.entries(MODULES).map(([slug, m]) => `
                             <button type="button" class="card-opt ${P.tipo === slug ? 'on' : ''}" data-field="tipo" data-value="${slug}">
                                 <span class="ic">${m.icon}</span><span class="nm">${m.name}</span><span class="ds">${m.desc}</span>
+                                <span class="ds" style="margin-top:6px;font-weight:700;color:#059669;">⚡ ${(COSTS[slug] || 1) > 1 ? COSTS[slug] + ' créditos' : '1 crédito'}</span>
                             </button>`).join('')}
                     </div>`,
                 valid: () => P.tipo ? null : 'Toca el documento que quieres preparar.',
@@ -455,7 +458,8 @@
             const last = stepIndex === steps.length - 1;
             const next = document.getElementById('wz-next');
             next.disabled = false;
-            next.textContent = last ? `✨ Preparar mi ${mod().short} (1 crédito)` : 'Siguiente →';
+            const cost = COSTS[P.tipo] || 1;
+            next.textContent = last ? `✨ Preparar mi ${mod().short} (${cost} ${cost > 1 ? 'créditos' : 'crédito'})` : 'Siguiente →';
         }
 
         function showError(msg) {
@@ -627,12 +631,17 @@
 
         function showNoCredits(data) {
             const wa = (data && data.whatsapp) || WHATSAPP;
+            // Le quedan créditos, pero no alcanzan (p. ej. un proyecto ABP necesita 2)
+            const left = (data && data.remaining) || 0;
+            const title = left > 0
+                ? `⚡ Este documento necesita ${data.needed} créditos y te queda ${left}`
+                : '⚡ Te quedaste sin créditos';
             const msgs = document.getElementById('messages');
             const wrap = document.createElement('div');
             wrap.className = 'msg-bot';
             wrap.innerHTML = `<div class="bot-avatar">🌱</div>
                 <div class="bubble-bot" style="border:2px solid #fde68a;background:#fffbeb;">
-                    <p style="font-weight:800;color:#92400e;margin:0 0 6px;font-size:16px;">⚡ Te quedaste sin créditos</p>
+                    <p style="font-weight:800;color:#92400e;margin:0 0 6px;font-size:16px;">${esc(title)}</p>
                     <p style="margin:0 0 12px;">Tus respuestas están guardadas. Escríbenos por WhatsApp y te recargamos créditos para que sigas preparando tus sesiones, programaciones y proyectos.</p>
                     <div style="display:flex;gap:8px;flex-wrap:wrap;">
                         <a href="${esc(wa)}" target="_blank" rel="noopener" style="background:#25d366;color:#fff;padding:11px 18px;border-radius:10px;font-weight:700;font-size:15px;text-decoration:none;">💬 Pedir créditos por WhatsApp</a>
@@ -641,7 +650,7 @@
                 </div>`;
             msgs.appendChild(wrap);
             msgs.scrollTop = msgs.scrollHeight;
-            document.getElementById('credits-count').textContent = '0';
+            document.getElementById('credits-count').textContent = String(left);
         }
 
         // Consulta cada 5 s (hasta ~6 min) si el servidor ya guardó la respuesta de la IA.

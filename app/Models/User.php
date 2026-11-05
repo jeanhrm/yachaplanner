@@ -94,9 +94,9 @@ class User extends Authenticatable
                ($this->plan_expires_at === null || $this->plan_expires_at->isFuture());
     }
 
-    public function hasCredits(): bool
+    public function hasCredits(int $cost = 1): bool
     {
-        return $this->remainingCredits() > 0;
+        return $this->remainingCredits() >= max(1, $cost);
     }
 
     public function remainingCredits(): int
