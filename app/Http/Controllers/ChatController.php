@@ -227,6 +227,8 @@ class ChatController extends Controller
             'stream'     => true,
             'system'     => $systemPrompt,
             'messages'   => $history,
+            // Menos razonamiento interno = el documento empieza y termina antes (la calidad se mantiene para esta tarea)
+            'output_config' => ['effort' => 'medium'],
         ];
         $headers = [
             'Content-Type: application/json',
@@ -258,14 +260,28 @@ class ChatController extends Controller
             $tokensOut = 0;
             $buffer    = '';   // curl puede partir un evento SSE entre dos llamadas
             $rawError  = '';   // cuerpo de error de la API (no es SSE)
+            $stopReason = null;
             $start     = microtime(true);
+            $lastSent  = microtime(true);
 
             $ch = curl_init('https://api.anthropic.com/v1/messages');
             curl_setopt_array($ch, [
                 CURLOPT_POST          => true,
                 CURLOPT_HTTPHEADER    => $headers,
                 CURLOPT_POSTFIELDS    => $payload,
-                CURLOPT_WRITEFUNCTION => function ($ch, $data) use (&$fullReply, &$tokensIn, &$tokensOut, &$buffer, &$rawError) {
+                // Mientras el modelo razona no llega texto; un comentario SSE cada 10 s
+                // evita que el proxy de Railway cierre la conexión por inactividad
+                CURLOPT_NOPROGRESS       => false,
+                CURLOPT_XFERINFOFUNCTION => function () use (&$lastSent) {
+                    if (microtime(true) - $lastSent >= 10) {
+                        echo ": ping\n\n";
+                        if (ob_get_level()) ob_flush();
+                        flush();
+                        $lastSent = microtime(true);
+                    }
+                    return 0;
+                },
+                CURLOPT_WRITEFUNCTION => function ($ch, $data) use (&$fullReply, &$tokensIn, &$tokensOut, &$buffer, &$rawError, &$stopReason, &$lastSent) {
                     $buffer .= $data;
                     $lines   = explode("\n", $buffer);
                     $buffer  = array_pop($lines);   // la última línea puede estar incompleta
@@ -297,15 +313,17 @@ class ChatController extends Controller
                                 echo 'data: ' . json_encode(['chunk' => $chunk]) . "\n\n";
                                 if (ob_get_level()) ob_flush();
                                 flush();
+                                $lastSent = microtime(true);
                             }
                         }
                         if (($event['type'] ?? '') === 'message_delta') {
-                            $tokensOut = $event['usage']['output_tokens'] ?? 0;
+                            $tokensOut  = $event['usage']['output_tokens'] ?? 0;
+                            $stopReason = $event['delta']['stop_reason'] ?? $stopReason;
                         }
                     }
                     return strlen($data);
                 },
-                CURLOPT_TIMEOUT => 300,
+                CURLOPT_TIMEOUT => 600,
             ]);
 
             curl_exec($ch);
@@ -357,8 +375,13 @@ class ChatController extends Controller
 
             $remaining = $user->remainingCredits();
 
+            if ($stopReason === 'max_tokens') {
+                Log::info('Respuesta cortada por max_tokens', ['session_id' => $sessionId, 'tokens_out' => $tokensOut]);
+            }
+
             echo 'data: ' . json_encode([
                 'done'              => true,
+                'truncated'         => $stopReason === 'max_tokens',
                 'session_id'        => $sessionId,
                 'credits_remaining' => $remaining,
             ]) . "\n\n";

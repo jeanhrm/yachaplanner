@@ -644,11 +644,27 @@
             document.getElementById('credits-count').textContent = '0';
         }
 
+        // Consulta cada 5 s (hasta ~6 min) si el servidor ya guardó la respuesta de la IA.
+        // La respuesta está guardada cuando el último mensaje de la sesión es del asistente.
+        async function waitForSaved(id) {
+            for (let i = 0; i < 72; i++) {
+                await new Promise(r => setTimeout(r, 5000));
+                try {
+                    const res = await fetch(`/chat/session/${id}`, { headers: { 'Accept': 'application/json' } });
+                    if (!res.ok) continue;
+                    const msgs = (await res.json()).messages || [];
+                    const last = msgs[msgs.length - 1];
+                    if (last && last.role === 'assistant' && last.content) return last.content;
+                } catch (e) { /* sin internet un momento: seguir esperando */ }
+            }
+            return null;
+        }
+
         // Envía al servidor y muestra la respuesta en vivo
         async function send(body, titleForRecent) {
             setBusy(true);
             showTyping();
-            let bubble = null, full = '', apiError = false, finished = false;
+            let bubble = null, full = '', apiError = false, finished = false, truncated = false;
             try {
                 const res = await fetch(STORE_URL, {
                     method: 'POST',
@@ -666,7 +682,10 @@
                 const decoder = new TextDecoder();
                 let buffer = '';
                 while (true) {
-                    const { done, value } = await reader.read();
+                    let chunkRead;
+                    // Si la conexión se corta a mitad, salir del bucle y recuperar lo guardado (abajo)
+                    try { chunkRead = await reader.read(); } catch (e) { break; }
+                    const { done, value } = chunkRead;
                     if (done) break;
                     buffer += decoder.decode(value, { stream: true });
                     const lines = buffer.split('\n');
@@ -692,12 +711,26 @@
                         }
                         if (data.done) {
                             finished = true;
+                            truncated = !!data.truncated;
                             document.getElementById('credits-count').textContent = data.credits_remaining;
                             upsertRecent(data.session_id, body.module, titleForRecent);
                         }
                     }
                 }
                 removeTyping();
+                if (!finished && !apiError && currentSessionId) {
+                    // La conexión se cortó, pero el servidor sigue trabajando y guarda el documento al terminar
+                    const wait = addMessage('assistant', '⏳ Estamos terminando de preparar tu documento. No cierres esta página...');
+                    const saved = await waitForSaved(currentSessionId);
+                    wait.remove();
+                    if (saved) {
+                        full = saved;
+                        if (!bubble) bubble = addMessage('assistant', '').querySelector('.bubble-bot');
+                        bubble.innerHTML = marked.parse(saved);
+                        finished = true;
+                        upsertRecent(currentSessionId, body.module, titleForRecent);
+                    }
+                }
                 if (!full) throw new Error('empty');
                 if (!finished) {
                     // Llegó texto pero el servidor no confirmó que lo guardó: no ofrecer una descarga que fallará
@@ -715,6 +748,9 @@
                     });
                     w.querySelector('.bubble-bot').appendChild(retry);
                     return false;
+                }
+                if (truncated) {
+                    addMessage('assistant', '⚠️ El documento salió muy largo y se cortó al final. Puedes pedir **"Hazlo más corto"** o **"Continúa desde donde te quedaste"** en los ajustes.');
                 }
                 document.getElementById('export-btn').style.display = 'inline-block';
                 document.getElementById('adjust').style.display = 'block';
